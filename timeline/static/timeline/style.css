@@ -1,0 +1,66 @@
+.navbar {
+  background: #483D3F;
+  color: #F4EBD9;
+}
+
+.header-row {
+  background: #483D3F;
+  color: #F4EBD9;
+}
+
+.image-gallery {
+  display: flex;
+  flex-flow: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+}
+
+.thumbnail-container {
+  position: relative;
+ aspect-ratio : 1 / 1;
+  width: 25%;
+}
+
+.thumbnail-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  background: red;
+}
+
+.overlay-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.thumbnail-container:hover .overlay-container {
+  opacity: 1;
+   width: 300%;
+  height: 300%;
+  top: -75%;
+  left: -75%;
+  border: 5px solid red;d;
+}
+
+.first {
+  border-right: 0.5rem #aff solid;
+}
+
+h3 {
+  top: 3rem !important;
+  transform: rotate(-20deg);
+  margin-bottom: 100px;
+}

@@ -1,0 +1,84 @@
+<html>
+{% load static %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{% static 'timeline/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar navbar-light p-3">
+    <h1>Kidz Compare</h1>
+</nav>
+
+<div class="container-fluid">
+    <div class="row sticky-top header-row">
+        <div class="col">
+            <h2>Age</h2>
+        </div>
+        {% for person in persons %}
+        <div class="col-5 text-center text-capitalize">
+            <h2>{{ person.name }}</h2>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% for age, group in data.items %}
+    <div class="row m-3">
+        <div class="col-2">
+            <h3 class="sticky-top">{{ age }} Wochen</h3>
+        </div>
+        <div class="col-5 image-gallery">
+            {% for filename in group.c1 %}
+            <div class="thumbnail-container">
+                <img src="{% static 'photos/images/'|add:filename %}" alt="{{ filename }}">
+                <div class="overlay-container">
+                    <img src="{% static 'photos/images/'|add:filename %}" alt="{{ filename }}">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="col-5 image-gallery">
+            {% for filename in group.c2 %}
+            <div class="thumbnail-container">
+                <img src="{% static 'photos/images/'|add:filename %}" alt="{{ filename }}">
+                <div class="overlay-container">
+                    <img src="{% static 'photos/images/'|add:filename %}" alt="{{ filename }}">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!--    <div class="row">-->
+    <!--        <div class="col-2">-->
+    <!--            1 year 3 weeks-->
+    <!--        </div>-->
+    <!--        <div class="col-5">-->
+    <!--            {% for x, y in image_files1.items %}-->
+    <!--            <p>{{ x }}</p>-->
+    <!--                {% for image_file in y %}-->
+    <!--                <img src="{% static 'photos/images/'|add:image_file %}"-->
+    <!--                     style=" float: left; width:  33%;    height: 150px;    object-fit: cover;" alt="{{ image_file }}">-->
+    <!--                {% endfor %}-->
+    <!--            {% endfor %}-->
+    <!--        </div>-->
+    <!--        <div class="col-5">-->
+    <!--            {% for image_file in image_files2 %}-->
+    <!--            &lt;!&ndash;        /static/photos/images/&ndash;&gt;-->
+    <!--            <img src="{% static 'photos/images/'|add:image_file %}" style=" float: left;-->
+    <!--    width:  33%;-->
+    <!--    height: 150px;-->
+    <!--    object-fit: cover;" alt="{{ image_file }}">-->
+    <!--            {% endfor %}-->
+    <!--        </div>-->
+    <!--    </div>-->
+</div>
+
+
+</body>
+</html>
+
+
