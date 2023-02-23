@@ -1,3 +1,5 @@
+/* https://coolors.co/cdc392-e8e5da-483d3f-9eb7e5-648de5 */
+
 .navbar {
   background: #483D3F;
   color: #F4EBD9;
@@ -10,10 +12,10 @@
 
 .image-gallery {
   display: flex;
-  flex-flow: wrap;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
-
+  align-content: flex-start;
 }
 
 .thumbnail-container {
@@ -48,7 +50,7 @@
 
 .thumbnail-container:hover .overlay-container {
   opacity: 1;
-   width: 300%;
+  width: 300%;
   height: 300%;
   top: -75%;
   left: -75%;
@@ -63,4 +65,10 @@ h3 {
   top: 3rem !important;
   transform: rotate(-20deg);
   margin-bottom: 100px;
+  z-index: 100 !important;
+}
+
+.photo-row {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
 }
