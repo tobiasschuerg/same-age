@@ -54,5 +54,5 @@ def show_images(request):
 
 
 def autoimport(request):
-    prepprocessor.import_images("input", image_folder)
-    return HttpResponse("yay")
+    result = prepprocessor.import_images("input", image_folder)
+    return HttpResponse(str(result))

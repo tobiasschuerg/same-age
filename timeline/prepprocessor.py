@@ -30,6 +30,7 @@ def fix_image_rotation(img):
 
 
 def import_images(input_folder, output_folder):
+    added = {}
     for name in os.listdir(input_folder):
         person = Person.objects.filter(name=name)
         if not person:
@@ -37,13 +38,16 @@ def import_images(input_folder, output_folder):
             person.save()
         else:
             person = person[0]
-        process_images(input_folder, person, output_folder)
+        count = process_images(input_folder, person, output_folder)
+        added[person.name + '_new'] = count
+    return added
 
 
 def process_images(input_root, person, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     input_dir = os.path.join(input_root, person.name)
+    add_count = 0
     for filename in os.listdir(input_dir):
         if not filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
             continue  # skip non-image files
@@ -52,6 +56,9 @@ def process_images(input_root, person, output_dir):
         output_path = os.path.join(output_dir, output_filename)
         capture_date = None
         with Image.open(input_path) as img:
+            if not img.getexif():
+                print(f"ERROR now exif data in {input_path}")
+                continue;
             exif_data = img._getexif()
             for tag_id, value in exif_data.items():
                 tag = TAGS.get(tag_id, tag_id)
@@ -66,7 +73,7 @@ def process_images(input_root, person, output_dir):
             img.save(output_path)
             # get creation date from EXIF data
 
-        record_creation_date = datetime.now()
+        record_creation_date = datetime.now().astimezone()
 
         found = TimelineImage.objects.filter(original_file_name=filename, capture_date=capture_date)
         if found:
@@ -80,3 +87,7 @@ def process_images(input_root, person, output_dir):
                 record_date=record_creation_date,
                 person_name=person
             ).save()
+            add_count += 1
+            print(f"{add_count}: photo of {person.name} added")
+
+    return add_count
