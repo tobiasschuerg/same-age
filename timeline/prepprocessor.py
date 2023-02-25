@@ -40,6 +40,8 @@ def import_images(input_folder, output_folder):
             person = person[0]
         count = process_images(input_folder, person, output_folder)
         added[person.name + '_new'] = count
+        added[person.name + '_total'] = TimelineImage.objects.filter(person_name=person).count()
+    print(added)
     return added
 
 

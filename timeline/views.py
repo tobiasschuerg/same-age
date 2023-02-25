@@ -1,5 +1,6 @@
 import collections
 import dataclasses
+import json
 from collections import defaultdict
 
 from django.http import HttpResponse
@@ -55,4 +56,4 @@ def show_images(request):
 
 def autoimport(request):
     result = prepprocessor.import_images("input", image_folder)
-    return HttpResponse(str(result))
+    return HttpResponse(json.dumps(result))
