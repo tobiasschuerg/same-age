@@ -1,5 +1,11 @@
 /* https://coolors.co/cdc392-e8e5da-483d3f-9eb7e5-648de5 */
 
+/*
+img {
+  filter: blur(5px);
+}
+*/
+
 .navbar {
   background: #483D3F;
   color: #F4EBD9;
@@ -30,31 +36,9 @@
   object-fit: cover;
 }
 
-.overlay-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  background: red;
-}
-
-.overlay-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.thumbnail-container:hover .overlay-container {
-  opacity: 1;
-  width: 300%;
-  height: 300%;
-  top: -75%;
-  left: -75%;
-  border: 5px solid red;d;
+.thumbnail-container:hover {
+  opacity: 0.5;
+  background: #648DE5;
 }
 
 .first {
@@ -71,4 +55,19 @@ h3 {
 .photo-row {
   margin-top: 1rem;
   margin-bottom: 2rem;
+}
+
+.highlight{
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+
+  height: 40%;
+  z-index: 1000;
+  pointer-events:none;
+  border-radius: 1rem;
+  border: 0.5rem #648DE5 solid;
+  margin: 0.5rem;
+
 }
