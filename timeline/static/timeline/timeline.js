@@ -25,3 +25,19 @@ function hideImage(element) {
   enlargedImage.style.opacity = "0";
   document.body.removeChild(enlargedImage);
 }
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const lazyImage = entry.target;
+      lazyImage.src = lazyImage.dataset.src;
+      lazyImage.classList.remove('lazy-load');
+      observer.unobserve(lazyImage);
+    }
+  });
+});
+
+const lazyImages = document.querySelectorAll('.lazy-load');
+lazyImages.forEach(image => {
+  observer.observe(image);
+});

@@ -36,7 +36,8 @@
         <div class="col-5 image-gallery">
             {% for image in group.c1 %}
             <div class="thumbnail-container">
-                <img src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
+                <img class="lazy-load"
+                     data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
                      onmouseover="showImage(this,
                                     '{% static 'photos/images/'|add:image.file_name %}',
                                     '{{image.person_name.name}}: {{image.capture_date}}')"
@@ -47,7 +48,8 @@
         <div class="col-5 image-gallery">
             {% for image in group.c2 %}
             <div class="thumbnail-container">
-                <img src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
+                <img class="lazy-load"
+                     data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
                      onmouseover="showImage(this,
                                     '{% static 'photos/images/'|add:image.file_name %}',
                                     '{{image.person_name.name}}: {{image.capture_date}}')"
