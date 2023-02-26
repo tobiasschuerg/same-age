@@ -67,6 +67,9 @@ def process_images(input_root, person, output_dir):
                 if tag == 'DateTimeOriginal':
                     capture_date_str = str(value)
                     capture_date = datetime.strptime(capture_date_str, '%Y:%m:%d %H:%M:%S')
+            if not capture_date:
+                print(f"Date missing {filename}")
+                continue
             # fix orientation
             img = fix_image_rotation(img)
             # resize to 800 pixels

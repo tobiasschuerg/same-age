@@ -62,12 +62,27 @@ h3 {
   bottom: 0px;
   right: 0px;
   left: 0px;
-
   height: 40%;
-  z-index: 1000;
-  pointer-events:none;
-  border-radius: 1rem;
-  border: 0.5rem #648DE5 solid;
+
+  width: fit-content;
+
   margin: 0.5rem;
 
+  z-index: 1000;
+  pointer-events:none;
+
+}
+.highlight p {
+  position: absolute;
+  top:0;
+  color: #fff;
+  background: #648DE5;
+  width: 100%;
+  border-radius: 1rem 1rem 0 0;
+}
+.highlight img {
+  position: relative;
+  height: 100%;
+  border-radius: 1rem;
+  border: 0.5rem #648DE5 solid;
 }
