@@ -9,7 +9,7 @@ Same-Age is a simple Django (Python) application crafted to compare photos of va
 
 1.1 Set up the local database and apply migrations:
 ```bash
-python manage.py migrate1 
+python manage.py migrate 
 ```
 
 1.2 Create an admin user
@@ -37,7 +37,7 @@ Congratulations! The app is now up and running. To access it, simply navigate to
 - Resizing the photos for better manageability
 - Copy resized photos to `timeline/static/photos`
 - Extracting capture date and potentially other metadata
-- (Future feature: performing face recognition)
+- (Future feature: performing face recognition -> #6)
 - Adding the photos to the database
 
 > Note 1: Depending on the number of photos, this process might take some time.
