@@ -1,11 +1,24 @@
 import os
 import uuid
 from datetime import datetime
+import logging
 
 from PIL import Image
 from PIL.ExifTags import TAGS
 
 from .models import TimelineImage, Person
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# create a console handler with a formatter
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+# add the console handler to the logger
+logger.addHandler(console_handler)
 
 
 def fix_image_rotation(img):
@@ -41,7 +54,7 @@ def import_images(input_folder, output_folder):
         count = process_images(input_folder, person, output_folder)
         added[person.name + '_new'] = count
         added[person.name + '_total'] = TimelineImage.objects.filter(person_name=person).count()
-    print(added)
+    logger.info(added)
     return added
 
 
@@ -59,7 +72,7 @@ def process_images(input_root, person, output_dir):
         capture_date = None
         with Image.open(input_path) as img:
             if not img.getexif():
-                print(f"ERROR now exif data in {input_path}")
+                logger.error(f"No exif data in {input_path}")
                 continue;
             exif_data = img._getexif()
             for tag_id, value in exif_data.items():
@@ -68,7 +81,7 @@ def process_images(input_root, person, output_dir):
                     capture_date_str = str(value)
                     capture_date = datetime.strptime(capture_date_str, '%Y:%m:%d %H:%M:%S')
             if not capture_date:
-                print(f"Date missing {filename}")
+                logger.warning(f"Date missing {filename}")
                 continue
             # fix orientation
             img = fix_image_rotation(img)
@@ -82,7 +95,7 @@ def process_images(input_root, person, output_dir):
 
         found = TimelineImage.objects.filter(original_file_name=filename, capture_date=capture_date)
         if found:
-            print(f"Skipping {filename} as it already exists")
+            logger.info(f"Skipping {filename} as it already exists")
         else:
             # create database entry
             TimelineImage(
@@ -93,6 +106,6 @@ def process_images(input_root, person, output_dir):
                 person_name=person
             ).save()
             add_count += 1
-            print(f"{add_count}: photo of {person.name} added")
+            logger.info(f"{add_count}: photo of {person.name} added")
 
     return add_count
