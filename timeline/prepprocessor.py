@@ -1,10 +1,11 @@
+import logging
 import os
 import uuid
 from datetime import datetime
-import logging
 
 from PIL import Image
 from PIL.ExifTags import TAGS
+from django.utils import timezone
 
 from .models import TimelineImage, Person
 
@@ -73,13 +74,14 @@ def process_images(input_root, person, output_dir):
         with Image.open(input_path) as img:
             if not img.getexif():
                 logger.error(f"No exif data in {input_path}")
-                continue;
+                continue
             exif_data = img._getexif()
             for tag_id, value in exif_data.items():
                 tag = TAGS.get(tag_id, tag_id)
                 if tag == 'DateTimeOriginal':
                     capture_date_str = str(value)
-                    capture_date = datetime.strptime(capture_date_str, '%Y:%m:%d %H:%M:%S')
+                    naive_datetime = datetime.strptime(capture_date_str, '%Y:%m:%d %H:%M:%S')
+                    capture_date = timezone.make_aware(naive_datetime, timezone=timezone.utc)
             if not capture_date:
                 logger.warning(f"Date missing {filename}")
                 continue
