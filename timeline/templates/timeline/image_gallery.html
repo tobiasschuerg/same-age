@@ -21,7 +21,7 @@
 
 <div class="container-fluid">
     <div class="row sticky-top header-row">
-        <div class="col">
+        <div class="col-1">
             <h2>Age</h2>
         </div>
         {% for person in persons %}
@@ -39,13 +39,16 @@
         {% for column in group.columns %}
         <div class="col image-gallery">
             {% for image in column %}
-            <div class="thumbnail-container">
+            <div class="thumbnail-container"
+                 onclick="toggleSelect(this)"
+                 data-column="{{ forloop.parentloop.counter0 }}">
                 <img class="lazy-load"
                      data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
                      onmouseover="showImage(this,
                                     '{% static 'photos/images/'|add:image.file_name %}',
                                     '{{image.person.name}}: {{image.capture_date}}')"
                      onmouseout="hideImage(this)">
+                <div class="select-check">&#10003;</div>
             </div>
             {% endfor %}
         </div>
@@ -53,6 +56,14 @@
     </div>
     {% endfor %}
 
+</div>
+
+<button id="enlarge-btn" class="enlarge-btn" onclick="openFullscreen()">
+    Enlarge (<span id="enlarge-count">0</span>)
+</button>
+
+<div id="fullscreen-overlay" class="fullscreen-overlay" onclick="closeFullscreen(event)">
+    <div class="fullscreen-content" id="fullscreen-content"></div>
 </div>
 
 <script src="{% static 'timeline/timeline.js' %}"></script>
