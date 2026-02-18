@@ -159,3 +159,4 @@ cython_debug/
 input/
 # target import directory
 timeline/static/photos/images/
+/.claude
