@@ -15,16 +15,18 @@ image_folder = 'timeline/static/photos/images'
 @dataclasses.dataclass
 class Group:
 
-    def __init__(self, total_weeks, age_string):
+    def __init__(self, total_weeks, age_string, num_persons):
         self.total_weeks = total_weeks
         self.age_string = age_string
-        self.c1 = []
-        self.c2 = []
+        self.columns = [[] for _ in range(num_persons)]
 
 
 def show_images(request):
-    persons = Person.objects.all()
+    persons = list(Person.objects.all())
     all_images = TimelineImage.objects.all()
+
+    person_index = {person.id: i for i, person in enumerate(persons)}
+    num_persons = len(persons)
 
     groups = defaultdict(list)
 
@@ -33,15 +35,8 @@ def show_images(request):
         weeks = image.age_in_weeks()
         age_string = image.age()
 
-        group = groups.get(weeks, Group(age_string=age_string, total_weeks=weeks))
-
-        if image.person == persons[0]:
-            group.c1.append(image)
-        elif image.person == persons[1]:
-            group.c2.append(image)
-        else:
-            print(f"unknown person {persons}")
-            continue
+        group = groups.get(weeks, Group(age_string=age_string, total_weeks=weeks, num_persons=num_persons))
+        group.columns[person_index[image.person_id]].append(image)
 
         groups[weeks] = group
 

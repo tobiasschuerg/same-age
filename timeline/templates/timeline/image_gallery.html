@@ -22,7 +22,7 @@
             <h2>Age</h2>
         </div>
         {% for person in persons %}
-        <div class="col-5 text-center text-capitalize">
+        <div class="col text-center text-capitalize">
             <h2>{{ person.name }}</h2>
         </div>
         {% endfor %}
@@ -30,11 +30,12 @@
 
     {% for weeks, group in data.items %}
     <div class="row photo-row">
-        <div class="col-2">
+        <div class="col-1">
             <h3 class="sticky-top">{{ group.age_string }}</h3>
         </div>
-        <div class="col-5 image-gallery">
-            {% for image in group.c1 %}
+        {% for column in group.columns %}
+        <div class="col image-gallery">
+            {% for image in column %}
             <div class="thumbnail-container">
                 <img class="lazy-load"
                      data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
@@ -45,18 +46,7 @@
             </div>
             {% endfor %}
         </div>
-        <div class="col-5 image-gallery">
-            {% for image in group.c2 %}
-            <div class="thumbnail-container">
-                <img class="lazy-load"
-                     data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
-                     onmouseover="showImage(this,
-                                    '{% static 'photos/images/'|add:image.file_name %}',
-                                    '{{image.person.name}}: {{image.capture_date}}')"
-                     onmouseout="hideImage(this)">
-            </div>
-            {% endfor %}
-        </div>
+        {% endfor %}
     </div>
     {% endfor %}
 
