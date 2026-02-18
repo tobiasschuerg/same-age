@@ -6,7 +6,7 @@ from collections import defaultdict
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from . import prepprocessor
+from . import importer
 from .models import TimelineImage, Person
 
 image_folder = 'timeline/static/photos/images'
@@ -35,9 +35,9 @@ def show_images(request):
 
         group = groups.get(weeks, Group(age_string=age_string, total_weeks=weeks))
 
-        if image.person_name == persons[0]:
+        if image.person == persons[0]:
             group.c1.append(image)
-        elif image.person_name == persons[1]:
+        elif image.person == persons[1]:
             group.c2.append(image)
         else:
             print(f"unknown person {persons}")
@@ -57,5 +57,5 @@ def show_images(request):
 
 
 def autoimport(request):
-    result = prepprocessor.import_images("input", image_folder)
+    result = importer.import_images("input", image_folder)
     return HttpResponse(json.dumps(result))

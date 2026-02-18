@@ -18,13 +18,13 @@ class TimelineImage(models.Model):
     original_file_name = models.CharField(max_length=255)
     capture_date = models.DateTimeField()
     record_date = models.DateTimeField()
-    person_name = models.ForeignKey(Person, on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, db_column='person_name_id')
 
     def __str__(self):
         return self.file_name
 
     def age_in_weeks(self):
-        return get_number_of_weeks(self.person_name.birthday, self.capture_date.date())
+        return get_number_of_weeks(self.person.birthday, self.capture_date.date())
 
     @staticmethod
     def age_in_months(birthday: date, other_date: date) -> int:
@@ -34,4 +34,4 @@ class TimelineImage(models.Model):
         return age_in_months
 
     def age(self):
-        return diff_str(self.person_name.birthday, self.capture_date.date())
+        return diff_str(self.person.birthday, self.capture_date.date())

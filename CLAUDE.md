@@ -33,19 +33,19 @@ python manage.py makemigrations
 
 **Request flow:**
 - `GET /` → `views.show_images()` — renders gallery grouped by week-age, two columns for side-by-side comparison
-- `GET /autoimport` → `views.autoimport()` → `prepprocessor.import_images()` — scans `input/` folders, extracts EXIF dates, rotates/resizes images to 800px, saves with UUID filenames to `timeline/static/photos/images/`, returns JSON stats
+- `GET /autoimport` → `views.autoimport()` → `importer.import_images()` — scans `input/` folders, extracts EXIF dates, rotates/resizes images to 800px, saves with UUID filenames to `timeline/static/photos/images/`, returns JSON stats
 
 **Frontend:** Bootstrap 5.3 (CDN), vanilla JS. Lazy loading via Intersection Observer. Hover-to-enlarge with person name and capture date overlay.
 
 **Key files:**
-- `timeline/prepprocessor.py` — image import pipeline (EXIF extraction, rotation fix, resize, duplicate detection)
+- `timeline/importer.py` — image import pipeline (EXIF extraction, rotation fix, resize, duplicate detection)
 - `timeline/utils.py` — age calculation helpers (`get_number_of_weeks`, `diff_str`)
 - `timeline/models.py` — Person and TimelineImage models
 - `timeline/views.py` — two views (gallery display + autoimport trigger)
 
 ## Import Pipeline Details
 
-Photos require EXIF `DateTimeOriginal` metadata. The preprocessor:
+Photos require EXIF `DateTimeOriginal` metadata. The importer:
 1. Creates a Person record per subfolder name in `input/`
 2. Skips duplicates by checking filename + capture_date combinations
 3. Applies EXIF orientation rotation before saving

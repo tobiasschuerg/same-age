@@ -40,7 +40,7 @@
                      data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
                      onmouseover="showImage(this,
                                     '{% static 'photos/images/'|add:image.file_name %}',
-                                    '{{image.person_name.name}}: {{image.capture_date}}')"
+                                    '{{image.person.name}}: {{image.capture_date}}')"
                      onmouseout="hideImage(this)">
             </div>
             {% endfor %}
@@ -52,7 +52,7 @@
                      data-src="{% static 'photos/images/'|add:image.file_name %}" alt="{{ image.file_name }}"
                      onmouseover="showImage(this,
                                     '{% static 'photos/images/'|add:image.file_name %}',
-                                    '{{image.person_name.name}}: {{image.capture_date}}')"
+                                    '{{image.person.name}}: {{image.capture_date}}')"
                      onmouseout="hideImage(this)">
             </div>
             {% endfor %}

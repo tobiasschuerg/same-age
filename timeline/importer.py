@@ -54,7 +54,7 @@ def import_images(input_folder, output_folder):
             person = person[0]
         count = process_images(input_folder, person, output_folder)
         added[person.name + '_new'] = count
-        added[person.name + '_total'] = TimelineImage.objects.filter(person_name=person).count()
+        added[person.name + '_total'] = TimelineImage.objects.filter(person=person).count()
     logger.info(added)
     return added
 
@@ -65,7 +65,7 @@ def process_images(input_root, person, output_dir):
     input_dir = os.path.join(input_root, person.name)
     add_count = 0
     # Fetch existing images for person from database and store in a dictionary
-    existing_images = {image.original_file_name: image for image in TimelineImage.objects.filter(person_name=person)}
+    existing_images = {image.original_file_name: image for image in TimelineImage.objects.filter(person=person)}
     for filename in os.listdir(input_dir):
         if not filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
             continue  # skip non-image files
@@ -109,7 +109,7 @@ def process_images(input_root, person, output_dir):
                     original_file_name=filename,
                     capture_date=capture_date,
                     record_date=record_creation_date,
-                    person_name=person
+                    person=person
                 ).save()
                 add_count += 1
                 logger.info(f"{add_count}: photo of {person.name} added")
@@ -120,7 +120,7 @@ def process_images(input_root, person, output_dir):
                 original_file_name=filename,
                 capture_date=capture_date,
                 record_date=record_creation_date,
-                person_name=person
+                person=person
             ).save()
             add_count += 1
             logger.info(f"{add_count}: photo of {person.name} added")
