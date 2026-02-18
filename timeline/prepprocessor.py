@@ -64,6 +64,8 @@ def process_images(input_root, person, output_dir):
         os.makedirs(output_dir)
     input_dir = os.path.join(input_root, person.name)
     add_count = 0
+    # Fetch existing images for person from database and store in a dictionary
+    existing_images = {image.original_file_name: image for image in TimelineImage.objects.filter(person_name=person)}
     for filename in os.listdir(input_dir):
         if not filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
             continue  # skip non-image files
@@ -95,9 +97,22 @@ def process_images(input_root, person, output_dir):
 
         record_creation_date = datetime.now().astimezone()
 
-        found = TimelineImage.objects.filter(original_file_name=filename, capture_date=capture_date)
-        if found:
-            logger.info(f"Skipping {filename} as it already exists")
+        # Check if image already exists using the dictionary
+        if filename in existing_images:
+            file_details = existing_images[filename]
+            if file_details.capture_date == capture_date:
+                logger.info(f"Skipping {filename} as it already exists")
+            else:
+                # create database entry
+                TimelineImage(
+                    file_name=output_filename,
+                    original_file_name=filename,
+                    capture_date=capture_date,
+                    record_date=record_creation_date,
+                    person_name=person
+                ).save()
+                add_count += 1
+                logger.info(f"{add_count}: photo of {person.name} added")
         else:
             # create database entry
             TimelineImage(
