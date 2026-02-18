@@ -1,18 +1,21 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 {% load static %}
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SameAge</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-
     <link rel="stylesheet" href="{% static 'timeline/style.css' %}">
 </head>
 <body>
 
-<nav class="navbar navbar-light p-3">
-    <h1>SameAge</h1>
-    <div class="text-end float:right" id="navbarNav">
-        <a class="link" href="/admin" target="_blank">Admin</a>
-        <a class="link" href="/autoimport" target="_blank">Import</a>
+<nav class="navbar p-3 d-flex justify-content-between align-items-center">
+    <span class="navbar-brand mb-0 h1">SameAge</span>
+    <div class="d-flex gap-3">
+        <a class="nav-link" href="/admin" target="_blank">Admin</a>
+        <a class="nav-link" href="/autoimport" target="_blank">Import</a>
     </div>
 </nav>
 
@@ -30,8 +33,8 @@
 
     {% for weeks, group in data.items %}
     <div class="row photo-row">
-        <div class="col-1">
-            <h3 class="sticky-top">{{ group.age_string }}</h3>
+        <div class="col-1 age-label-col">
+            <div class="age-label sticky-top">{{ group.age_string }}</div>
         </div>
         {% for column in group.columns %}
         <div class="col image-gallery">
@@ -52,9 +55,6 @@
 
 </div>
 
-</body>
 <script src="{% static 'timeline/timeline.js' %}"></script>
-
+</body>
 </html>
-
-

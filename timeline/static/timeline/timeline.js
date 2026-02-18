@@ -1,43 +1,48 @@
+// Build highlight container once at page load
+const highlightContainer = document.createElement("div");
+highlightContainer.classList.add("highlight", "text-center");
+
+const highlightImg = document.createElement("img");
+highlightImg.alt = "Enlarged image";
+
+const highlightLabel = document.createElement("p");
+
+highlightContainer.appendChild(highlightImg);
+highlightContainer.appendChild(highlightLabel);
+document.body.appendChild(highlightContainer);
+
+let hideTimeout = null;
+
 function showImage(element, path, title) {
-  var container = document.createElement("div");
-  container.classList.add("highlight");
-
-  var label = document.createElement("p");
-  container.classList.add("text-center");
-  label.textContent = title;
-
-  var enlargedImage = document.createElement("img");
-  enlargedImage.src = path;
-  enlargedImage.alt = "Enlarged image";
-  enlargedImage.style.transition = "opacity 0.3s ease-in-out";
-
-  container.appendChild(enlargedImage);
-  container.appendChild(label);
-
-  document.body.appendChild(container);
-  setTimeout(function() {
-    enlargedImage.style.opacity = "1";
-  }, 100);
+  if (hideTimeout) {
+    clearTimeout(hideTimeout);
+    hideTimeout = null;
+  }
+  highlightImg.src = path;
+  highlightLabel.textContent = title;
+  highlightContainer.classList.add("visible");
 }
 
 function hideImage(element) {
-  var enlargedImage = document.querySelector(".highlight");
-  enlargedImage.style.opacity = "0";
-  document.body.removeChild(enlargedImage);
+  highlightContainer.classList.remove("visible");
+  hideTimeout = setTimeout(function () {
+    highlightImg.src = "";
+  }, 200);
 }
 
+// Lazy loading via Intersection Observer
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const lazyImage = entry.target;
       lazyImage.src = lazyImage.dataset.src;
-      lazyImage.classList.remove('lazy-load');
+      lazyImage.classList.remove("lazy-load");
       observer.unobserve(lazyImage);
     }
   });
 });
 
-const lazyImages = document.querySelectorAll('.lazy-load');
+const lazyImages = document.querySelectorAll(".lazy-load");
 lazyImages.forEach(image => {
   observer.observe(image);
 });
