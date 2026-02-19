@@ -1,0 +1,36 @@
+/* --- Slideshow --- */
+.fullscreen-item.slideshow-hidden {
+  opacity: 0;
+}
+
+.slideshow-name,
+.slideshow-age {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.slideshow-name.visible,
+.slideshow-age.visible {
+  opacity: 1;
+}
+
+.slideshow-age {
+  color: #cdc392;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.slideshow-paused::after {
+  content: "PAUSED";
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #f4ebd9;
+  background: rgba(72, 61, 63, 0.8);
+  padding: 0.3rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 2001;
+}

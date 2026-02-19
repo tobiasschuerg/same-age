@@ -105,13 +105,21 @@ function openFullscreen() {
 // biome-ignore lint/correctness/noUnusedVariables: called from HTML onclick
 function closeFullscreen(event) {
   if (event.target === fullscreenOverlay) {
-    fullscreenOverlay.classList.remove("open");
+    if (slideshowActive) {
+      stopSlideshow();
+    } else {
+      fullscreenOverlay.classList.remove("open");
+    }
   }
 }
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && fullscreenOverlay.classList.contains("open")) {
-    fullscreenOverlay.classList.remove("open");
+    if (slideshowActive) {
+      stopSlideshow();
+    } else {
+      fullscreenOverlay.classList.remove("open");
+    }
   }
 });
 
