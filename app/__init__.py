@@ -15,7 +15,7 @@ from flask import (
     url_for,
 )
 
-from .utils import diff_str, get_number_of_weeks
+from .utils import diff_str, get_group_key
 
 app = Flask(__name__)
 
@@ -266,20 +266,20 @@ def gallery():
 
             capture_date = datetime.fromisoformat(date_str.replace("Z", "+00:00")).date()
 
-            weeks = get_number_of_weeks(birthday, capture_date)
-            if weeks < 1:
+            key = get_group_key(birthday, capture_date)
+            if key[1] < 1:
                 continue
 
             age_string = diff_str(birthday, capture_date)
 
-            group = groups.get(weeks)
+            group = groups.get(key)
             if group is None:
                 group = Group(
-                    total_weeks=weeks,
+                    total_weeks=key[1],
                     age_string=age_string,
                     num_persons=num_persons,
                 )
-                groups[weeks] = group
+                groups[key] = group
 
             group.columns[person_index[pid]].append(
                 {
