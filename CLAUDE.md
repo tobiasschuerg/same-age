@@ -10,25 +10,25 @@ SameAge (Immich Edition) is a containerized Flask app that compares photos of pe
 
 ```bash
 # Build and run with Docker Compose (serves at http://localhost:5050)
-cd immich && docker compose up --build
+docker compose up --build
 
 # Rebuild after code changes
-cd immich && docker compose up --build -d --force-recreate
+docker compose up --build -d --force-recreate
 
 # View logs
-cd immich && docker compose logs -f
+docker compose logs -f
 
 # Stop
-cd immich && docker compose down
+docker compose down
 ```
 
-**Configuration:** Set `IMMICH_API_KEY` in `immich/.env` or export it. `IMMICH_URL` defaults to `http://192.168.178.19:2283`.
+**Configuration:** Set `IMMICH_API_KEY` in `.env` or export it. `IMMICH_URL` defaults to `http://192.168.178.19:2283`.
 
-**Dependencies:** Flask, Gunicorn, Requests. Managed via `immich/requirements.txt`.
+**Dependencies:** Flask, Gunicorn, Requests. Managed via `requirements.txt`.
 
 ## Architecture
 
-**Single Flask app** in `immich/`. No database — all data comes from the Immich API at runtime.
+**Single Flask app** at the repository root. No database — all data comes from the Immich API at runtime.
 
 **Routes:**
 
@@ -51,11 +51,11 @@ cd immich && docker compose down
 **Frontend:** Bootstrap 5.3 (CDN), vanilla JS. Lazy loading via Intersection Observer. Hover-to-enlarge with person name and capture date overlay. Photo selection with fullscreen side-by-side comparison.
 
 **Key files:**
-- `immich/app.py` — Flask app: routes, Immich API client, gallery grouping logic
-- `immich/utils.py` — age calculation helpers (`get_number_of_weeks`, `diff_str`)
-- `immich/templates/select.html` — person selection page with face thumbnail cards
-- `immich/templates/gallery.html` — photo gallery grouped by age-in-weeks
-- `immich/static/style.css` — all styling
-- `immich/static/timeline.js` — hover preview, photo selection, fullscreen, lazy loading
-- `immich/Dockerfile` — Python 3.11 slim + gunicorn
-- `immich/docker-compose.yml` — single service, port 5050, env vars
+- `app.py` — Flask app: routes, Immich API client, gallery grouping logic
+- `utils.py` — age calculation helpers (`get_number_of_weeks`, `diff_str`)
+- `templates/select.html` — person selection page with face thumbnail cards
+- `templates/gallery.html` — photo gallery grouped by age-in-weeks
+- `static/style.css` — all styling
+- `static/timeline.js` — hover preview, photo selection, fullscreen, lazy loading
+- `Dockerfile` — Python 3.11 slim + gunicorn
+- `docker-compose.yml` — single service, port 5050, env vars
