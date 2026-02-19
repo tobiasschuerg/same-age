@@ -35,14 +35,23 @@ const selectedPhotos = new Map(); // column index -> { src, container }
 const enlargeBtn = document.getElementById("enlarge-btn");
 const enlargeCount = document.getElementById("enlarge-count");
 
+function getPhotoLabel(container) {
+  const img = container.querySelector("img");
+  const title = img.getAttribute("alt") || "";
+  const row = container.closest(".photo-row");
+  const age = row ? row.querySelector(".age-label").textContent.trim() : "";
+  return title + (age ? " — " + age : "");
+}
+
 function toggleSelect(container) {
   const col = container.getAttribute("data-column");
   const img = container.querySelector("img");
   const src = img.dataset.src || img.src;
+  const key = col + ":" + src;
 
   if (container.classList.contains("selected")) {
     container.classList.remove("selected");
-    selectedPhotos.delete(col + ":" + src);
+    selectedPhotos.delete(key);
   } else {
     // Deselect any other photo in the same column
     const prev = document.querySelector(
@@ -55,7 +64,7 @@ function toggleSelect(container) {
       selectedPhotos.delete(col + ":" + prevSrc);
     }
     container.classList.add("selected");
-    selectedPhotos.set(col + ":" + src, src);
+    selectedPhotos.set(key, { src, label: getPhotoLabel(container) });
   }
 
   updateEnlargeBtn();
@@ -73,11 +82,18 @@ const fullscreenContent = document.getElementById("fullscreen-content");
 
 function openFullscreen() {
   fullscreenContent.innerHTML = "";
-  for (const src of selectedPhotos.values()) {
+  for (const { src, label } of selectedPhotos.values()) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "fullscreen-item";
     const img = document.createElement("img");
     img.src = src.replace("/thumbnail/", "/original/");
-    img.alt = "Selected photo";
-    fullscreenContent.appendChild(img);
+    img.alt = label;
+    const caption = document.createElement("p");
+    caption.className = "fullscreen-label";
+    caption.textContent = label;
+    wrapper.appendChild(img);
+    wrapper.appendChild(caption);
+    fullscreenContent.appendChild(wrapper);
   }
   fullscreenOverlay.classList.add("open");
 }
