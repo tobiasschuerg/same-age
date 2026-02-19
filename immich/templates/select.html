@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SameAge — Select People</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .person-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .person-card {
+            width: 160px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 1rem 0.5rem;
+            transition: all 0.2s ease;
+            background: #F4EBD9;
+        }
+        .person-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .person-card.selected {
+            outline: 3px solid #648DE5;
+            background: #dde6f9;
+        }
+        .person-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #CDC392;
+            transition: border-color 0.2s;
+        }
+        .person-card.selected img {
+            border-color: #648DE5;
+        }
+        .person-card .name {
+            margin-top: 0.5rem;
+            font-weight: 600;
+            color: #483D3F;
+            text-transform: capitalize;
+        }
+        .compare-btn {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 1100;
+            background: #648DE5;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .compare-btn.visible { display: block; }
+        .compare-btn:hover { background: #4a73cc; color: #fff; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar p-3 d-flex justify-content-between align-items-center">
+    <span class="navbar-brand mb-0 h1">SameAge — Immich</span>
+</nav>
+
+<div class="container-fluid">
+    <div class="text-center mt-4 mb-2">
+        <h2 style="color: #483D3F;">Select people to compare</h2>
+    </div>
+    <div class="person-grid">
+        {% for person in persons %}
+        <div class="person-card" data-id="{{ person.id }}" onclick="togglePerson(this)">
+            <img src="/person-thumbnail/{{ person.id }}" alt="{{ person.name }}">
+            <div class="name">{{ person.name }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<a id="compare-btn" class="compare-btn" href="#">
+    Compare (<span id="compare-count">0</span>)
+</a>
+
+<script>
+const selected = new Set();
+const btn = document.getElementById("compare-btn");
+const countEl = document.getElementById("compare-count");
+
+function togglePerson(card) {
+    const id = card.dataset.id;
+    if (selected.has(id)) {
+        selected.delete(id);
+        card.classList.remove("selected");
+    } else {
+        selected.add(id);
+        card.classList.add("selected");
+    }
+    countEl.textContent = selected.size;
+    btn.classList.toggle("visible", selected.size > 0);
+    btn.href = "/gallery?" + Array.from(selected).map(id => "persons=" + id).join("&");
+}
+</script>
+</body>
+</html>

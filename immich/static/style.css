@@ -1,0 +1,236 @@
+/* Palette: https://coolors.co/cdc392-e8e5da-483d3f-9eb7e5-648de5 */
+
+body {
+  background: #E8E5DA;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* --- Navbar --- */
+.navbar {
+  background: #483D3F;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.navbar .navbar-brand {
+  color: #F4EBD9;
+  font-weight: 700;
+}
+
+.navbar .nav-link {
+  color: #CDC392;
+  transition: color 0.2s;
+}
+
+.navbar .nav-link:hover {
+  color: #F4EBD9;
+}
+
+/* --- Header row --- */
+.header-row {
+  background: #483D3F;
+  color: #F4EBD9;
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1020;
+}
+
+/* --- Age labels --- */
+.age-label-col {
+  display: flex;
+  align-items: flex-start;
+}
+
+.age-label {
+  top: 4rem !important;
+  background: #F4EBD9;
+  border-left: 4px solid #648DE5;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0 4px 4px 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #483D3F;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+/* --- Photo rows --- */
+.photo-row {
+  margin-top: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #CDC392;
+}
+
+/* --- Gallery grid --- */
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-content: flex-start;
+  gap: 3px;
+  padding: 0 0.5rem;
+}
+
+/* --- Thumbnails --- */
+.thumbnail-container {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: calc(25% - 3px);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.thumbnail-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.thumbnail-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(100, 141, 229, 0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.thumbnail-container:hover img {
+  transform: scale(1.08);
+  filter: brightness(1.05);
+}
+
+.thumbnail-container:hover::after {
+  opacity: 1;
+}
+
+/* --- Selection --- */
+.thumbnail-container .select-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid #648DE5;
+  color: transparent;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+  transition: all 0.15s ease;
+}
+
+.thumbnail-container.selected .select-check {
+  background: #648DE5;
+  color: #fff;
+}
+
+.thumbnail-container.selected {
+  outline: 3px solid #648DE5;
+  outline-offset: -3px;
+}
+
+/* --- Enlarge button --- */
+.enlarge-btn {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1100;
+  background: #648DE5;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s;
+}
+
+.enlarge-btn.visible {
+  display: block;
+}
+
+.enlarge-btn:hover {
+  background: #4a73cc;
+}
+
+/* --- Fullscreen overlay --- */
+.fullscreen-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.92);
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.fullscreen-overlay.open {
+  display: flex;
+}
+
+.fullscreen-content {
+  display: flex;
+  gap: 1rem;
+  max-width: 100%;
+  max-height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-content img {
+  max-height: 90vh;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* --- Highlight overlay --- */
+.highlight {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  height: 40%;
+  width: fit-content;
+  margin: 0.5rem;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.highlight.visible {
+  opacity: 1;
+}
+
+.highlight p {
+  position: absolute;
+  top: 0;
+  color: #fff;
+  background: #648DE5;
+  width: 100%;
+  border-radius: 0.75rem 0.75rem 0 0;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+}
+
+.highlight img {
+  position: relative;
+  height: 100%;
+  border-radius: 0.75rem;
+  border: 3px solid #648DE5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
