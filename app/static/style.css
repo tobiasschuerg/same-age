@@ -50,7 +50,7 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   color: #483d3f;
-  white-space: nowrap;
+  white-space: normal;
   z-index: 100;
 }
 
