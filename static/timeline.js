@@ -129,3 +129,27 @@ const lazyImages = document.querySelectorAll(".lazy-load");
 lazyImages.forEach(image => {
   observer.observe(image);
 });
+
+// --- Collapsible rows ---
+document.querySelectorAll(".photo-row").forEach(row => {
+  const galleries = row.querySelectorAll(".image-gallery");
+  let needsCollapse = false;
+
+  galleries.forEach(gallery => {
+    const thumbs = gallery.querySelectorAll(".thumbnail-container");
+    if (thumbs.length > 8) {
+      needsCollapse = true;
+      const overlay = document.createElement("div");
+      overlay.className = "expand-overlay";
+      overlay.textContent = "+" + (thumbs.length - 7);
+      overlay.addEventListener("click", function (e) {
+        e.stopPropagation();
+        row.classList.remove("collapsed");
+        row.querySelectorAll(".expand-overlay").forEach(o => o.remove());
+      });
+      thumbs[7].appendChild(overlay);
+    }
+  });
+
+  if (needsCollapse) row.classList.add("collapsed");
+});

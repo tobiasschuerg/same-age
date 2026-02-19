@@ -60,6 +60,31 @@ body {
   border-bottom: 1px solid #CDC392;
 }
 
+/* --- Collapsible rows --- */
+.photo-row.collapsed .image-gallery .thumbnail-container:nth-child(n+9) {
+  display: none;
+}
+
+.expand-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(72, 61, 63, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F4EBD9;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 3;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.expand-overlay:hover {
+  background: rgba(100, 141, 229, 0.8);
+}
+
 /* --- Gallery grid --- */
 .image-gallery {
   display: flex;
