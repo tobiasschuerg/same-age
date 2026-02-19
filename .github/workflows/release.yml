@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: check app/
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: format --check app/
+      - uses: biomejs/setup-biome@v2
+      - run: biome check app/static/
+      - run: docker build .
+
+  release-please:
+    name: Release Please
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: simple
