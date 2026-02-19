@@ -108,31 +108,14 @@ body {
 }
 
 /* --- Selection --- */
-.thumbnail-container .select-check {
+.thumbnail-container.selected::before {
+  content: "";
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  border: 2px solid #648DE5;
-  color: transparent;
-  font-size: 14px;
-  line-height: 18px;
-  text-align: center;
+  inset: 0;
+  border: 3px solid #648DE5;
+  border-radius: 4px;
+  z-index: 2;
   pointer-events: none;
-  transition: all 0.15s ease;
-}
-
-.thumbnail-container.selected .select-check {
-  background: #648DE5;
-  color: #fff;
-}
-
-.thumbnail-container.selected {
-  outline: 3px solid #648DE5;
-  outline-offset: -3px;
 }
 
 /* --- Enlarge button --- */
