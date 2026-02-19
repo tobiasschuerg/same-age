@@ -13,7 +13,8 @@ document.body.appendChild(highlightContainer);
 
 let hideTimeout = null;
 
-function showImage(element, path, title) {
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML onmouseover
+function showImage(_element, path, title) {
   if (hideTimeout) {
     clearTimeout(hideTimeout);
     hideTimeout = null;
@@ -23,9 +24,10 @@ function showImage(element, path, title) {
   highlightContainer.classList.add("visible");
 }
 
-function hideImage(element) {
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML onmouseout
+function hideImage(_element) {
   highlightContainer.classList.remove("visible");
-  hideTimeout = setTimeout(function () {
+  hideTimeout = setTimeout(() => {
     highlightImg.src = "";
   }, 200);
 }
@@ -40,14 +42,15 @@ function getPhotoLabel(container) {
   const title = img.getAttribute("alt") || "";
   const row = container.closest(".photo-row");
   const age = row ? row.querySelector(".age-label").textContent.trim() : "";
-  return title + (age ? " — " + age : "");
+  return title + (age ? ` — ${age}` : "");
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML onclick
 function toggleSelect(container) {
   const col = container.getAttribute("data-column");
   const img = container.querySelector("img");
   const src = img.dataset.src || img.src;
-  const key = col + ":" + src;
+  const key = `${col}:${src}`;
 
   if (container.classList.contains("selected")) {
     container.classList.remove("selected");
@@ -55,13 +58,13 @@ function toggleSelect(container) {
   } else {
     // Deselect any other photo in the same column
     const prev = document.querySelector(
-      `.thumbnail-container.selected[data-column="${col}"]`
+      `.thumbnail-container.selected[data-column="${col}"]`,
     );
     if (prev && prev !== container) {
       prev.classList.remove("selected");
       const prevImg = prev.querySelector("img");
       const prevSrc = prevImg.dataset.src || prevImg.src;
-      selectedPhotos.delete(col + ":" + prevSrc);
+      selectedPhotos.delete(`${col}:${prevSrc}`);
     }
     container.classList.add("selected");
     selectedPhotos.set(key, { src, label: getPhotoLabel(container) });
@@ -80,6 +83,7 @@ function updateEnlargeBtn() {
 const fullscreenOverlay = document.getElementById("fullscreen-overlay");
 const fullscreenContent = document.getElementById("fullscreen-content");
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML onclick
 function openFullscreen() {
   fullscreenContent.innerHTML = "";
   for (const { src, label } of selectedPhotos.values()) {
@@ -98,26 +102,28 @@ function openFullscreen() {
   fullscreenOverlay.classList.add("open");
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML onclick
 function closeFullscreen(event) {
   if (event.target === fullscreenOverlay) {
     fullscreenOverlay.classList.remove("open");
   }
 }
 
-document.addEventListener("keydown", function (e) {
+document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && fullscreenOverlay.classList.contains("open")) {
     fullscreenOverlay.classList.remove("open");
   }
 });
 
 // --- Lazy loading via Intersection Observer ---
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       const lazyImage = entry.target;
       const container = lazyImage.closest(".thumbnail-container");
       container.classList.add("loading");
-      lazyImage.onload = lazyImage.onerror = () => container.classList.remove("loading");
+      lazyImage.onload = lazyImage.onerror = () =>
+        container.classList.remove("loading");
       lazyImage.src = lazyImage.dataset.src;
       lazyImage.classList.remove("lazy-load");
       observer.unobserve(lazyImage);
@@ -126,26 +132,28 @@ const observer = new IntersectionObserver(entries => {
 });
 
 const lazyImages = document.querySelectorAll(".lazy-load");
-lazyImages.forEach(image => {
+lazyImages.forEach((image) => {
   observer.observe(image);
 });
 
 // --- Collapsible rows ---
-document.querySelectorAll(".photo-row").forEach(row => {
+document.querySelectorAll(".photo-row").forEach((row) => {
   const galleries = row.querySelectorAll(".image-gallery");
   let needsCollapse = false;
 
-  galleries.forEach(gallery => {
+  galleries.forEach((gallery) => {
     const thumbs = gallery.querySelectorAll(".thumbnail-container");
     if (thumbs.length > 8) {
       needsCollapse = true;
       const overlay = document.createElement("div");
       overlay.className = "expand-overlay";
-      overlay.textContent = "+" + (thumbs.length - 7);
-      overlay.addEventListener("click", function (e) {
+      overlay.textContent = `+${thumbs.length - 7}`;
+      overlay.addEventListener("click", (e) => {
         e.stopPropagation();
         row.classList.remove("collapsed");
-        row.querySelectorAll(".expand-overlay").forEach(o => o.remove());
+        row.querySelectorAll(".expand-overlay").forEach((o) => {
+          o.remove();
+        });
       });
       thumbs[7].appendChild(overlay);
     }

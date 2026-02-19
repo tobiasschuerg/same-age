@@ -1,34 +1,34 @@
 /* Palette: https://coolors.co/cdc392-e8e5da-483d3f-9eb7e5-648de5 */
 
 body {
-  background: #E8E5DA;
+  background: #e8e5da;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 /* --- Navbar --- */
 .navbar {
-  background: #483D3F;
+  background: #483d3f;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .navbar .navbar-brand {
-  color: #F4EBD9;
+  color: #f4ebd9;
   font-weight: 700;
 }
 
 .navbar .nav-link {
-  color: #CDC392;
+  color: #cdc392;
   transition: color 0.2s;
 }
 
 .navbar .nav-link:hover {
-  color: #F4EBD9;
+  color: #f4ebd9;
 }
 
 /* --- Header row --- */
 .header-row {
-  background: #483D3F;
-  color: #F4EBD9;
+  background: #483d3f;
+  color: #f4ebd9;
   padding: 0.5rem 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   z-index: 1020;
@@ -41,14 +41,15 @@ body {
 }
 
 .age-label {
+  /* biome-ignore lint/complexity/noImportantStyles: overrides Bootstrap sticky-top */
   top: 4rem !important;
-  background: #F4EBD9;
-  border-left: 4px solid #648DE5;
+  background: #f4ebd9;
+  border-left: 4px solid #648de5;
   padding: 0.25rem 0.6rem;
   border-radius: 0 4px 4px 0;
   font-weight: 600;
   font-size: 0.9rem;
-  color: #483D3F;
+  color: #483d3f;
   white-space: nowrap;
   z-index: 100;
 }
@@ -57,11 +58,11 @@ body {
 .photo-row {
   margin-top: 0.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #CDC392;
+  border-bottom: 1px solid #cdc392;
 }
 
 /* --- Collapsible rows --- */
-.photo-row.collapsed .image-gallery .thumbnail-container:nth-child(n+9) {
+.photo-row.collapsed .image-gallery .thumbnail-container:nth-child(n + 9) {
   display: none;
 }
 
@@ -72,7 +73,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #F4EBD9;
+  color: #f4ebd9;
   font-size: 1.3rem;
   font-weight: 700;
   cursor: pointer;
@@ -98,7 +99,9 @@ body {
 
 /* --- Loading spinner --- */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .thumbnail-container.loading::after {
@@ -107,8 +110,8 @@ body {
   margin: auto;
   width: 24px;
   height: 24px;
-  border: 3px solid #CDC392;
-  border-top-color: #648DE5;
+  border: 3px solid #cdc392;
+  border-top-color: #648de5;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   opacity: 1;
@@ -130,7 +133,9 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 .thumbnail-container::after {
@@ -157,7 +162,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  border: 3px solid #648DE5;
+  border: 3px solid #648de5;
   border-radius: 4px;
   z-index: 2;
   pointer-events: none;
@@ -170,7 +175,7 @@ body {
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 1100;
-  background: #648DE5;
+  background: #648de5;
   color: #fff;
   border: none;
   padding: 0.6rem 1.4rem;
@@ -232,7 +237,7 @@ body {
 }
 
 .fullscreen-label {
-  color: #F4EBD9;
+  color: #f4ebd9;
   font-size: 1rem;
   font-weight: 600;
   margin-top: 0.5rem;
@@ -262,7 +267,7 @@ body {
   position: absolute;
   top: 0;
   color: #fff;
-  background: #648DE5;
+  background: #648de5;
   width: 100%;
   border-radius: 0.75rem 0.75rem 0 0;
   margin: 0;
@@ -274,6 +279,6 @@ body {
   position: relative;
   height: 100%;
   border-radius: 0.75rem;
-  border: 3px solid #648DE5;
+  border: 3px solid #648de5;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }

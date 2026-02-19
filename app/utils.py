@@ -18,8 +18,8 @@ def diff_str(start_date, end_date):
 
     if years:
         if weeks:
-            return f'{years} {y_label} and {weeks} {w_label}'
+            return f"{years} {y_label} and {weeks} {w_label}"
         else:
-            return f'{years} {y_label}'
+            return f"{years} {y_label}"
     else:
-        return f'{weeks} {w_label}'
+        return f"{weeks} {w_label}"

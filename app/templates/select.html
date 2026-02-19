@@ -111,7 +111,7 @@ function togglePerson(card) {
     }
     countEl.textContent = selected.size;
     btn.classList.toggle("visible", selected.size > 0);
-    btn.href = "/gallery?" + Array.from(selected).map(id => "persons=" + id).join("&");
+    btn.href = `/gallery?${Array.from(selected).map(id => `persons=${id}`).join("&")}`;
 }
 </script>
 </body>

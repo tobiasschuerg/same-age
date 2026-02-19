@@ -4,7 +4,16 @@ from collections import OrderedDict
 from datetime import datetime
 
 import requests
-from flask import Flask, Response, jsonify, redirect, render_template, request, stream_with_context, url_for
+from flask import (
+    Flask,
+    Response,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    stream_with_context,
+    url_for,
+)
 
 from .utils import diff_str, get_number_of_weeks
 
@@ -57,7 +66,8 @@ load_config()
 @app.before_request
 def require_setup():
     """Redirect to setup if not yet configured."""
-    if not is_configured() and request.endpoint not in ("setup", "check_url", "check_key", "static"):
+    allowed = ("setup", "check_url", "check_key", "static")
+    if not is_configured() and request.endpoint not in allowed:
         return redirect(url_for("setup"))
 
 
@@ -65,9 +75,7 @@ def immich_request(method, path, **kwargs):
     """Make an authenticated request to the Immich API."""
     headers = kwargs.pop("headers", {})
     headers["x-api-key"] = config["api_key"]
-    return requests.request(
-        method, f"{config['immich_url']}/api{path}", headers=headers, **kwargs
-    )
+    return requests.request(method, f"{config['immich_url']}/api{path}", headers=headers, **kwargs)
 
 
 def immich_get(path, **kwargs):
@@ -92,10 +100,7 @@ def fetch_people():
     resp = immich_get("/people")
     resp.raise_for_status()
     all_people = resp.json().get("people", [])
-    persons = [
-        p for p in all_people
-        if p.get("name") and p.get("birthDate")
-    ]
+    persons = [p for p in all_people if p.get("name") and p.get("birthDate")]
     persons.sort(key=lambda p: p["name"])
     return persons
 
@@ -177,9 +182,7 @@ def check_key():
 
     def check_perm(name, method, path, **kwargs):
         try:
-            r = requests.request(
-                method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs
-            )
+            r = requests.request(method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs)
             checks.append({"name": name, "ok": r.status_code == 200})
         except Exception:
             checks.append({"name": name, "ok": False})
@@ -219,9 +222,7 @@ def gallery():
     # Parse birthdays
     birthdays = {}
     for p in persons:
-        birthdays[p["id"]] = datetime.fromisoformat(
-            p["birthDate"].replace("Z", "+00:00")
-        ).date()
+        birthdays[p["id"]] = datetime.fromisoformat(p["birthDate"].replace("Z", "+00:00")).date()
 
     groups = {}
 
@@ -233,13 +234,16 @@ def gallery():
         page = 1
         assets = []
         while True:
-            resp = immich_post("/search/metadata", json={
-                "personIds": [pid],
-                "type": "IMAGE",
-                "withExif": True,
-                "size": 1000,
-                "page": page,
-            })
+            resp = immich_post(
+                "/search/metadata",
+                json={
+                    "personIds": [pid],
+                    "type": "IMAGE",
+                    "withExif": True,
+                    "size": 1000,
+                    "page": page,
+                },
+            )
             resp.raise_for_status()
             result = resp.json()
             items = result.get("assets", result).get("items", [])
@@ -260,9 +264,7 @@ def gallery():
             if not date_str:
                 continue
 
-            capture_date = datetime.fromisoformat(
-                date_str.replace("Z", "+00:00")
-            ).date()
+            capture_date = datetime.fromisoformat(date_str.replace("Z", "+00:00")).date()
 
             weeks = get_number_of_weeks(birthday, capture_date)
             if weeks < 1:
@@ -279,11 +281,13 @@ def gallery():
                 )
                 groups[weeks] = group
 
-            group.columns[person_index[pid]].append({
-                "id": asset["id"],
-                "person_name": person["name"],
-                "capture_date": capture_date.strftime("%Y-%m-%d"),
-            })
+            group.columns[person_index[pid]].append(
+                {
+                    "id": asset["id"],
+                    "person_name": person["name"],
+                    "capture_date": capture_date.strftime("%Y-%m-%d"),
+                }
+            )
 
     # Sort by week ascending
     sorted_groups = OrderedDict(sorted(groups.items()))
