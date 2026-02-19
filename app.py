@@ -1,23 +1,73 @@
+import json
 import os
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 
 import requests
-from flask import Flask, Response, render_template, request, stream_with_context
+from flask import Flask, Response, jsonify, redirect, render_template, request, stream_with_context, url_for
 
 from utils import diff_str, get_number_of_weeks
 
 app = Flask(__name__)
 
-IMMICH_URL = os.environ.get("IMMICH_URL", "http://192.168.178.19:2283")
-IMMICH_API_KEY = os.environ.get("IMMICH_API_KEY", "")
+CONFIG_PATH = os.environ.get("CONFIG_PATH", "/data/config.json")
+
+config = {"immich_url": "", "api_key": ""}
+
+
+def load_config():
+    """Load config from JSON file, with env var overrides."""
+    global config
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH) as f:
+                config = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            config = {"immich_url": "", "api_key": ""}
+    env_url = os.environ.get("IMMICH_URL")
+    env_key = os.environ.get("IMMICH_API_KEY")
+    if env_url:
+        config["immich_url"] = env_url
+    if env_key:
+        config["api_key"] = env_key
+
+
+def save_config():
+    """Save current config to JSON file."""
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(config, f, indent=2)
+
+
+def normalize_url(url):
+    """Strip whitespace/trailing slashes, prepend http:// if no scheme."""
+    url = (url or "").strip().rstrip("/")
+    if url and not url.startswith(("http://", "https://")):
+        url = "http://" + url
+    return url
+
+
+def is_configured():
+    return bool(config.get("immich_url") and config.get("api_key"))
+
+
+load_config()
+
+
+@app.before_request
+def require_setup():
+    """Redirect to setup if not yet configured."""
+    if not is_configured() and request.endpoint not in ("setup", "check_url", "check_key", "static"):
+        return redirect(url_for("setup"))
 
 
 def immich_request(method, path, **kwargs):
     """Make an authenticated request to the Immich API."""
     headers = kwargs.pop("headers", {})
-    headers["x-api-key"] = IMMICH_API_KEY
-    return requests.request(method, f"{IMMICH_URL}/api{path}", headers=headers, **kwargs)
+    headers["x-api-key"] = config["api_key"]
+    return requests.request(
+        method, f"{config['immich_url']}/api{path}", headers=headers, **kwargs
+    )
 
 
 def immich_get(path, **kwargs):
@@ -48,6 +98,101 @@ def fetch_people():
     ]
     persons.sort(key=lambda p: p["name"])
     return persons
+
+
+@app.route("/setup", methods=["GET", "POST"])
+def setup():
+    """Setup wizard for Immich connection."""
+    if request.method == "GET":
+        step = int(request.args.get("step", 1))
+        return render_template(
+            "setup.html",
+            step=step,
+            immich_url=config.get("immich_url", ""),
+        )
+
+    # POST — validate input
+    step = int(request.form.get("step", 1))
+
+    if step == 1:
+        url = normalize_url(request.form.get("immich_url", ""))
+        if not url:
+            return redirect(url_for("setup"))
+        config["immich_url"] = url
+        return render_template("setup.html", step=2, immich_url=url)
+
+    if step == 2:
+        api_key = request.form.get("api_key", "").strip()
+        url = normalize_url(request.form.get("immich_url", "")) or config.get("immich_url", "")
+        if not api_key:
+            return render_template("setup.html", step=2, immich_url=url)
+        config["immich_url"] = url
+        config["api_key"] = api_key
+        save_config()
+        return redirect(url_for("select_persons"))
+
+    return redirect(url_for("setup"))
+
+
+@app.route("/setup/check-url", methods=["POST"])
+def check_url():
+    """AJAX endpoint to verify Immich URL reachability."""
+    url = normalize_url((request.json or {}).get("url", ""))
+    if not url:
+        return jsonify(ok=False, error="Please enter a URL.")
+    try:
+        resp = requests.get(f"{url}/api/server/ping", timeout=5)
+        resp.raise_for_status()
+        if resp.json().get("res") != "pong":
+            raise ValueError("Unexpected response")
+    except Exception:
+        return jsonify(ok=False, error="Could not reach Immich at that URL.")
+    config["immich_url"] = url
+    return jsonify(ok=True, url=url)
+
+
+@app.route("/setup/check-key", methods=["POST"])
+def check_key():
+    """AJAX endpoint to verify API key and check permissions."""
+    data = request.json or {}
+    url = data.get("url", "").strip().rstrip("/") or config.get("immich_url", "")
+    api_key = data.get("api_key", "").strip()
+    if not api_key:
+        return jsonify(ok=False, error="Please enter an API key.")
+
+    headers = {"x-api-key": api_key}
+
+    # Validate key
+    try:
+        resp = requests.get(f"{url}/api/users/me", headers=headers, timeout=5)
+        if resp.status_code == 401:
+            return jsonify(ok=False, error="Invalid API key.")
+        resp.raise_for_status()
+    except requests.exceptions.ConnectionError:
+        return jsonify(ok=False, error="Could not connect to Immich.")
+    except Exception:
+        return jsonify(ok=False, error="Invalid API key or could not authenticate.")
+
+    # Check required permissions
+    checks = []
+
+    def check_perm(name, method, path, **kwargs):
+        try:
+            r = requests.request(
+                method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs
+            )
+            checks.append({"name": name, "ok": r.status_code == 200})
+        except Exception:
+            checks.append({"name": name, "ok": False})
+
+    check_perm("People", "GET", "/people")
+    check_perm("Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1})
+    # Search returns asset data, so if it works, asset read access is confirmed
+    search_ok = checks[-1]["ok"]
+    checks.append({"name": "Assets", "ok": search_ok})
+
+    all_ok = all(c["ok"] for c in checks)
+    return jsonify(ok=True, checks=checks, all_ok=all_ok)
 
 
 @app.route("/")

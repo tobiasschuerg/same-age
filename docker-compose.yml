@@ -4,6 +4,11 @@ services:
     ports:
       - "5050:5000"
     environment:
-      - IMMICH_URL=http://192.168.178.19:2283
-      - IMMICH_API_KEY=${IMMICH_API_KEY}
+      - IMMICH_URL=${IMMICH_URL:-}
+      - IMMICH_API_KEY=${IMMICH_API_KEY:-}
+    volumes:
+      - sameage-data:/data
     restart: unless-stopped
+
+volumes:
+  sameage-data:

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SameAge — Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .setup-card {
+            max-width: 480px;
+            margin: 4rem auto;
+            background: #F4EBD9;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+        .setup-card h2 {
+            color: #483D3F;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .setup-card .step-info {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .setup-card label {
+            color: #483D3F;
+            font-weight: 600;
+        }
+        .setup-card .form-control {
+            border: 2px solid #CDC392;
+            border-radius: 8px;
+        }
+        .setup-card .form-control:focus {
+            border-color: #648DE5;
+            box-shadow: 0 0 0 0.2rem rgba(100, 141, 229, 0.25);
+        }
+        .setup-card .btn-primary {
+            background: #648DE5;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+        }
+        .setup-card .btn-primary:hover {
+            background: #4a73cc;
+        }
+        .setup-card .form-text {
+            color: #777;
+        }
+        #perm-items li {
+            padding: 0.1rem 0;
+        }
+        #perm-items li::before {
+            display: inline-block;
+            width: 1.2em;
+            margin-right: 0.25em;
+        }
+        li.perm-pending { color: #888; }
+        li.perm-pending::before { content: "\25CB"; }
+        li.perm-ok { color: #198754; }
+        li.perm-ok::before { content: "\2713"; }
+        li.perm-fail { color: #dc3545; }
+        li.perm-fail::before { content: "\2717"; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar p-3 d-flex justify-content-between align-items-center">
+    <span class="navbar-brand mb-0 h1">SameAge — Immich</span>
+</nav>
+
+<div class="container">
+    <div class="setup-card">
+        {% if step == 1 %}
+        <h2>Connect to Immich</h2>
+        <p class="step-info">Step 1 of 2 — Server URL</p>
+
+        <div class="mb-3">
+            <label for="immich_url" class="form-label">Immich URL</label>
+            <input type="url" class="form-control" id="immich_url"
+                   value="{{ immich_url }}" placeholder="http://192.168.1.100:2283">
+            <div class="form-text">The full URL of your Immich instance, including the port.</div>
+        </div>
+
+        <div id="status"></div>
+
+        <form id="next-form" method="post" action="{{ url_for('setup') }}" style="display:none;">
+            <input type="hidden" name="step" value="1">
+            <input type="hidden" name="immich_url" id="next-url" value="">
+            <button type="submit" class="btn btn-primary">Next &rarr;</button>
+        </form>
+
+        <script>
+        (function() {
+            const input = document.getElementById("immich_url");
+            const status = document.getElementById("status");
+            const nextForm = document.getElementById("next-form");
+            const nextUrl = document.getElementById("next-url");
+            let timer = null;
+            let controller = null;
+
+            function check(url) {
+                if (controller) controller.abort();
+                nextForm.style.display = "none";
+
+                url = url.trim().replace(/\/+$/, "");
+                if (!url) { status.innerHTML = ""; return; }
+
+                status.innerHTML = '<div class="d-flex align-items-center gap-2 text-secondary my-2">' +
+                    '<div class="spinner-border spinner-border-sm" role="status"></div> Checking connection&hellip;</div>';
+
+                controller = new AbortController();
+                fetch("{{ url_for('check_url') }}", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({url: url}),
+                    signal: controller.signal
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        status.innerHTML = '<div class="alert alert-success py-2 my-2">Connected to Immich successfully.</div>';
+                        if (data.url) input.value = data.url;
+                        nextUrl.value = data.url || url;
+                        nextForm.style.display = "block";
+                    } else {
+                        status.innerHTML = '<div class="alert alert-danger py-2 my-2">' + data.error + '</div>';
+                    }
+                })
+                .catch(err => {
+                    if (err.name !== "AbortError") {
+                        status.innerHTML = '<div class="alert alert-danger py-2 my-2">Connection check failed.</div>';
+                    }
+                });
+            }
+
+            input.addEventListener("input", function() {
+                clearTimeout(timer);
+                timer = setTimeout(() => check(input.value), 500);
+            });
+
+            // Auto-check if URL is pre-filled
+            if (input.value.trim()) check(input.value);
+        })();
+        </script>
+
+        {% elif step == 2 %}
+        <h2>Connect to Immich</h2>
+        <p class="step-info">Step 2 of 2 — API Key</p>
+
+        <div class="mb-3">
+            <label for="api_key" class="form-label">API Key</label>
+            <input type="text" class="form-control" id="api_key"
+                   placeholder="Paste your Immich API key">
+            <div class="form-text">
+                <a href="{{ immich_url }}/user-settings?isOpen=api-keys" target="_blank" rel="noopener">
+                    Create one in Immich &nearr;
+                </a>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <small class="text-secondary fw-bold">Required permissions</small>
+            <ul class="list-unstyled mb-0 mt-1" id="perm-items">
+                <li class="perm-pending">People</li>
+                <li class="perm-pending">Search</li>
+                <li class="perm-pending">Assets</li>
+            </ul>
+        </div>
+
+        <div id="status"></div>
+
+        <form id="save-form" method="post" action="{{ url_for('setup') }}" style="display:none;">
+            <input type="hidden" name="step" value="2">
+            <input type="hidden" name="immich_url" value="{{ immich_url }}">
+            <input type="hidden" name="api_key" id="save-key" value="">
+            <button type="submit" class="btn btn-primary">Save &amp; continue &rarr;</button>
+        </form>
+
+        <script>
+        (function() {
+            const input = document.getElementById("api_key");
+            const status = document.getElementById("status");
+            const permItems = document.getElementById("perm-items");
+            const saveForm = document.getElementById("save-form");
+            const saveKey = document.getElementById("save-key");
+            let timer = null;
+            let controller = null;
+
+            function resetPerms() {
+                permItems.querySelectorAll("li").forEach(function(li) {
+                    li.className = "perm-pending";
+                });
+            }
+
+            function check(key) {
+                if (controller) controller.abort();
+                saveForm.style.display = "none";
+                resetPerms();
+
+                key = key.trim();
+                if (!key) { status.innerHTML = ""; return; }
+
+                status.innerHTML = '<div class="d-flex align-items-center gap-2 text-secondary my-2">' +
+                    '<div class="spinner-border spinner-border-sm" role="status"></div> Verifying API key&hellip;</div>';
+
+                controller = new AbortController();
+                fetch("{{ url_for('check_key') }}", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({url: "{{ immich_url }}", api_key: key}),
+                    signal: controller.signal
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.ok) {
+                        status.innerHTML = '<div class="alert alert-danger py-2 my-2">' + data.error +
+                            ' <a href="#" class="alert-link" onclick="retry(event)">Retry</a></div>';
+                        return;
+                    }
+
+                    // Update permission list items
+                    const items = permItems.querySelectorAll("li");
+                    data.checks.forEach(function(c, i) {
+                        if (items[i]) {
+                            items[i].className = c.ok ? "perm-ok" : "perm-fail";
+                        }
+                    });
+
+                    if (data.all_ok) {
+                        status.innerHTML = '<div class="alert alert-success py-2 my-2">API key is valid. All permissions granted.</div>';
+                        saveKey.value = key;
+                        saveForm.style.display = "block";
+                    } else {
+                        status.innerHTML = '<div class="alert alert-warning py-2 my-2">' +
+                            'API key is valid but some permissions are missing. ' +
+                            'Update the key permissions above, then ' +
+                            '<a href="#" class="alert-link" onclick="retry(event)">re-check</a>.</div>';
+                    }
+                })
+                .catch(err => {
+                    if (err.name !== "AbortError") {
+                        status.innerHTML = '<div class="alert alert-danger py-2 my-2">Verification failed. ' +
+                            '<a href="#" class="alert-link" onclick="retry(event)">Retry</a></div>';
+                    }
+                });
+            }
+
+            window.retry = function(e) {
+                e.preventDefault();
+                check(input.value);
+            };
+
+            input.addEventListener("input", function() {
+                clearTimeout(timer);
+                timer = setTimeout(() => check(input.value), 400);
+            });
+        })();
+        </script>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
