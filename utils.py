@@ -13,10 +13,13 @@ def diff_str(start_date, end_date):
 
     weeks += 1
 
+    y_label = "year" if years == 1 else "years"
+    w_label = "week" if weeks == 1 else "weeks"
+
     if years:
         if weeks:
-            return f'{years} years and {weeks} weeks'
+            return f'{years} {y_label} and {weeks} {w_label}'
         else:
-            return f'{years} years'
+            return f'{years} {y_label}'
     else:
-        return f'{weeks} weeks'
+        return f'{weeks} {w_label}'

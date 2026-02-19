@@ -1,0 +1,10 @@
+.git
+.gitignore
+.gitattributes
+.claude
+.env
+*.env
+CLAUDE.md
+__pycache__
+*.py[cod]
+docker-compose.yml

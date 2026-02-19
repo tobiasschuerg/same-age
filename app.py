@@ -1,6 +1,6 @@
 import json
 import os
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from datetime import datetime
 
 import requests
@@ -147,7 +147,6 @@ def check_url():
             raise ValueError("Unexpected response")
     except Exception:
         return jsonify(ok=False, error="Could not reach Immich at that URL.")
-    config["immich_url"] = url
     return jsonify(ok=True, url=url)
 
 
@@ -155,7 +154,7 @@ def check_url():
 def check_key():
     """AJAX endpoint to verify API key and check permissions."""
     data = request.json or {}
-    url = data.get("url", "").strip().rstrip("/") or config.get("immich_url", "")
+    url = normalize_url(data.get("url", "")) or config.get("immich_url", "")
     api_key = data.get("api_key", "").strip()
     if not api_key:
         return jsonify(ok=False, error="Please enter an API key.")
@@ -224,7 +223,7 @@ def gallery():
             p["birthDate"].replace("Z", "+00:00")
         ).date()
 
-    groups = defaultdict(lambda: None)
+    groups = {}
 
     for person in persons:
         pid = person["id"]

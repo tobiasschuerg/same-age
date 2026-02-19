@@ -117,7 +117,7 @@ const observer = new IntersectionObserver(entries => {
       const lazyImage = entry.target;
       const container = lazyImage.closest(".thumbnail-container");
       container.classList.add("loading");
-      lazyImage.onload = () => container.classList.remove("loading");
+      lazyImage.onload = lazyImage.onerror = () => container.classList.remove("loading");
       lazyImage.src = lazyImage.dataset.src;
       lazyImage.classList.remove("lazy-load");
       observer.unobserve(lazyImage);
