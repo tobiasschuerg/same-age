@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 from flask import Flask, Response, jsonify, redirect, render_template, request, stream_with_context, url_for
 
-from utils import diff_str, get_number_of_weeks
+from .utils import diff_str, get_number_of_weeks
 
 app = Flask(__name__)
 
