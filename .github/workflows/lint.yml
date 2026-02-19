@@ -9,7 +9,7 @@ jobs:
     name: Ruff (Python)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/ruff-action@v3
         with:
           args: check app/
@@ -21,6 +21,6 @@ jobs:
     name: Biome (JS/CSS)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: biomejs/setup-biome@v2
       - run: biome check app/static/
