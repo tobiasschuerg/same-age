@@ -36,7 +36,7 @@ def load_config():
         try:
             with open(CONFIG_PATH) as f:
                 config = json.load(f)
-        except (json.JSONDecodeError, OSError):
+        except json.JSONDecodeError, OSError:
             config = {"immich_url": "", "api_key": ""}
     env_url = os.environ.get("IMMICH_URL")
     env_key = os.environ.get("IMMICH_API_KEY")

@@ -4,6 +4,10 @@ Compare photos of people at the same age. Connects to your [Immich](https://immi
 
 Select people from your Immich library, and SameAge displays their photos organized by age-in-weeks — so you can see what everyone looked like at 12 weeks, 6 months, 2 years, etc.
 
+| Select people | Compare by age | Side-by-side |
+|---|---|---|
+| ![Select people to compare](screenshots/selection.png) | ![Timeline grouped by age](screenshots/timeline.png) | ![Fullscreen side-by-side comparison](screenshots/side-by-side.png) |
+
 ## Requirements
 
 - A running [Immich](https://immich.app/) instance with people identified and birthdates set
