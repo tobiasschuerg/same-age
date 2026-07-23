@@ -29,9 +29,9 @@ def diff_str(start_date, end_date):
             return f"{y} {y_label} and {m} {m_label}"
         return f"{y} {y_label}"
 
-    years = delta.days // 365
-    remaining_days = delta.days - (years * 365)
-    weeks = remaining_days // 7 + 1
+    total_weeks = get_number_of_weeks(start_date, end_date)
+    years = (total_weeks - 1) // 52
+    weeks = (total_weeks - 1) % 52 + 1
 
     y_label = "year" if years == 1 else "years"
     w_label = "week" if weeks == 1 else "weeks"

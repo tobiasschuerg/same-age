@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SameAge — Connection Error</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-card {
+            max-width: 480px;
+            margin: 4rem auto;
+            background: #F4EBD9;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+        .error-card h2 {
+            color: #483D3F;
+            font-weight: 700;
+        }
+        .error-card p {
+            color: #483D3F;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar p-3">
+    <span class="navbar-brand mb-0 h1">SameAge — Immich</span>
+</nav>
+
+<div class="error-card">
+    <h2>Couldn't reach Immich</h2>
+    <p>SameAge couldn't connect to your Immich server. Make sure it's running and reachable, then try again.</p>
+    <a href="/" class="btn btn-primary">Retry</a>
+</div>
+
+</body>
+</html>

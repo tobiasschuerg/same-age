@@ -14,10 +14,15 @@ from flask import (
     stream_with_context,
     url_for,
 )
+from requests.exceptions import RequestException
 
 from .utils import diff_str, get_group_key
 
 app = Flask(__name__)
+
+# (connect timeout, read timeout) — read timeout applies per chunk for
+# streamed responses, so it won't cut off large image downloads.
+IMMICH_TIMEOUT = (5, 30)
 
 CONFIG_PATH = os.environ.get("CONFIG_PATH", "/data/config.json")
 
@@ -71,10 +76,17 @@ def require_setup():
         return redirect(url_for("setup"))
 
 
+@app.errorhandler(RequestException)
+def handle_immich_error(_error):
+    """Show a friendly page instead of a 500 when Immich is unreachable."""
+    return render_template("error.html"), 502
+
+
 def immich_request(method, path, **kwargs):
     """Make an authenticated request to the Immich API."""
     headers = kwargs.pop("headers", {})
     headers["x-api-key"] = config["api_key"]
+    kwargs.setdefault("timeout", IMMICH_TIMEOUT)
     return requests.request(method, f"{config['immich_url']}/api{path}", headers=headers, **kwargs)
 
 
@@ -222,7 +234,7 @@ def gallery():
     # Parse birthdays
     birthdays = {}
     for p in persons:
-        birthdays[p["id"]] = datetime.fromisoformat(p["birthDate"].replace("Z", "+00:00")).date()
+        birthdays[p["id"]] = datetime.fromisoformat(p["birthDate"]).date()
 
     groups = {}
 
@@ -264,7 +276,7 @@ def gallery():
             if not date_str:
                 continue
 
-            capture_date = datetime.fromisoformat(date_str.replace("Z", "+00:00")).date()
+            capture_date = datetime.fromisoformat(date_str).date()
 
             key = get_group_key(birthday, capture_date)
             if key[1] < 1:

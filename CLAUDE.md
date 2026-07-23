@@ -78,7 +78,7 @@ Both run in CI via GitHub Actions on every push and PR.
 - `app/templates/gallery.html` — photo gallery grouped by age-in-weeks
 - `app/static/style.css` — all styling
 - `app/static/timeline.js` — hover preview, photo selection, fullscreen, lazy loading, collapsible rows
-- `Dockerfile` — Python 3.13 slim + gunicorn
+- `Dockerfile` — Python 3.14 slim + gunicorn
 - `docker-compose.yml` — single service, port 5050, persistent volume
 - `pyproject.toml` — ruff config
 - `biome.json` — biome config
