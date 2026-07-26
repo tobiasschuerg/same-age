@@ -105,6 +105,12 @@
                        min="3" max="30" value="{{ slideshow_seconds }}" style="width: 6rem;">
                 <div class="form-text">How long each photo stays on screen before the next one appears.</div>
             </div>
+            <div class="mb-3">
+                <label for="reveal_delay_seconds" class="form-label">Reveal delay</label>
+                <input type="number" class="form-control" id="reveal_delay_seconds" name="reveal_delay_seconds"
+                       min="0" max="30" value="{{ reveal_delay_seconds }}" style="width: 6rem;">
+                <div class="form-text">How long to show just the photo before the name and age fade in.</div>
+            </div>
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>

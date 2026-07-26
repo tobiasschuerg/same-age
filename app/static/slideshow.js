@@ -6,13 +6,16 @@ let slideshowTimers = [];
 let slideshowPaused = false;
 let slideshowActive = false;
 
-// SLIDESHOW_SECONDS is set by an inline <script> in gallery.html from the
-// user's saved settings; fall back to 9s if it's missing for any reason.
+// SLIDESHOW_SECONDS/REVEAL_DELAY_SECONDS are set by an inline <script> in
+// gallery.html from the user's saved settings; fall back if missing.
 const STEP_MS = (typeof SLIDESHOW_SECONDS === "number" ? SLIDESHOW_SECONDS : 9) * 1000;
-// Name/age labels fade in a fixed amount of time before the next photo,
-// so the reveal pacing stays sensible at any slide duration.
-const NAME_DELAY_MS = Math.max(0, STEP_MS - 4000);
-const AGE_DELAY_MS = Math.max(0, STEP_MS - 1000);
+// Name label fades in after the reveal delay; age label follows 3s later.
+// Both are clamped to the slide duration so a long delay can't outlast it.
+const NAME_DELAY_MS = Math.min(
+  STEP_MS,
+  (typeof REVEAL_DELAY_SECONDS === "number" ? REVEAL_DELAY_SECONDS : 5) * 1000,
+);
+const AGE_DELAY_MS = Math.min(STEP_MS, NAME_DELAY_MS + 3000);
 const slideshowProgress = document.getElementById("slideshow-progress");
 const slideshowProgressBar = document.getElementById("slideshow-progress-bar");
 

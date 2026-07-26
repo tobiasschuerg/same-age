@@ -69,7 +69,10 @@
 </div>
 
 <script src="{{ url_for('static', filename='timeline.js') }}"></script>
-<script>const SLIDESHOW_SECONDS = {{ slideshow_seconds }};</script>
+<script>
+    const SLIDESHOW_SECONDS = {{ slideshow_seconds }};
+    const REVEAL_DELAY_SECONDS = {{ reveal_delay_seconds }};
+</script>
 <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
 </body>
 </html>

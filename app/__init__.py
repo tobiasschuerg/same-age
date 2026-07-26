@@ -27,7 +27,12 @@ IMMICH_TIMEOUT = (5, 30)
 
 CONFIG_PATH = os.environ.get("CONFIG_PATH", "/data/config.json")
 
-DEFAULT_CONFIG = {"immich_url": "", "api_key": "", "slideshow_seconds": 9}
+DEFAULT_CONFIG = {
+    "immich_url": "",
+    "api_key": "",
+    "slideshow_seconds": 9,
+    "reveal_delay_seconds": 5,
+}
 
 config = dict(DEFAULT_CONFIG)
 
@@ -305,17 +310,25 @@ def settings():
         unauthorized=unauthorized,
         connection_error=error,
         slideshow_seconds=config.get("slideshow_seconds", DEFAULT_CONFIG["slideshow_seconds"]),
+        reveal_delay_seconds=config.get(
+            "reveal_delay_seconds", DEFAULT_CONFIG["reveal_delay_seconds"]
+        ),
     )
 
 
 @app.route("/settings/slideshow", methods=["POST"])
 def save_slideshow_settings():
-    """Save the slideshow's seconds-per-photo preference."""
+    """Save the slideshow's seconds-per-photo and reveal delay preferences."""
     try:
         seconds = int(request.form.get("slideshow_seconds", 9))
     except ValueError:
         seconds = DEFAULT_CONFIG["slideshow_seconds"]
+    try:
+        reveal_delay = int(request.form.get("reveal_delay_seconds", 5))
+    except ValueError:
+        reveal_delay = DEFAULT_CONFIG["reveal_delay_seconds"]
     config["slideshow_seconds"] = max(3, min(30, seconds))
+    config["reveal_delay_seconds"] = max(0, min(30, reveal_delay))
     save_config()
     return redirect(url_for("settings"))
 
@@ -339,10 +352,17 @@ def select_persons():
 @app.route("/gallery")
 def gallery():
     slideshow_seconds = config.get("slideshow_seconds", DEFAULT_CONFIG["slideshow_seconds"])
+    reveal_delay_seconds = config.get(
+        "reveal_delay_seconds", DEFAULT_CONFIG["reveal_delay_seconds"]
+    )
     selected_ids = request.args.getlist("persons")
     if not selected_ids:
         return render_template(
-            "gallery.html", persons=[], data={}, slideshow_seconds=slideshow_seconds
+            "gallery.html",
+            persons=[],
+            data={},
+            slideshow_seconds=slideshow_seconds,
+            reveal_delay_seconds=reveal_delay_seconds,
         )
 
     all_persons = fetch_people()
@@ -350,7 +370,11 @@ def gallery():
 
     if not persons:
         return render_template(
-            "gallery.html", persons=[], data={}, slideshow_seconds=slideshow_seconds
+            "gallery.html",
+            persons=[],
+            data={},
+            slideshow_seconds=slideshow_seconds,
+            reveal_delay_seconds=reveal_delay_seconds,
         )
 
     person_index = {p["id"]: i for i, p in enumerate(persons)}
@@ -430,7 +454,11 @@ def gallery():
     sorted_groups = OrderedDict(sorted(groups.items()))
 
     return render_template(
-        "gallery.html", persons=persons, data=sorted_groups, slideshow_seconds=slideshow_seconds
+        "gallery.html",
+        persons=persons,
+        data=sorted_groups,
+        slideshow_seconds=slideshow_seconds,
+        reveal_delay_seconds=reveal_delay_seconds,
     )
 
 
