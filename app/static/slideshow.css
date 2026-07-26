@@ -20,6 +20,41 @@
   font-weight: 400;
 }
 
+/* --- Progress bar --- */
+.slideshow-progress {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(244, 235, 217, 0.15);
+  z-index: 2002;
+}
+
+.slideshow-progress.visible {
+  display: block;
+}
+
+.slideshow-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #648de5;
+}
+
+.slideshow-paused .slideshow-progress-bar {
+  animation-play-state: paused;
+}
+
+@keyframes slideshow-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 .slideshow-paused::after {
   content: "PAUSED";
   position: fixed;

@@ -6,6 +6,27 @@ let slideshowTimers = [];
 let slideshowPaused = false;
 let slideshowActive = false;
 
+const STEP_MS = 9000;
+const slideshowProgress = document.getElementById("slideshow-progress");
+const slideshowProgressBar = document.getElementById("slideshow-progress-bar");
+
+function resetProgressBar() {
+  slideshowProgressBar.style.animationName = "none";
+  void slideshowProgressBar.offsetWidth; // force reflow so the next animation restarts from 0
+}
+
+function startProgressBar(durationMs) {
+  resetProgressBar();
+  // Set duration/timing/fill-mode inline, but leave animation-play-state
+  // alone so the .slideshow-paused stylesheet rule can still pause it —
+  // the `animation` shorthand would set play-state inline too, which beats
+  // that rule regardless of specificity.
+  slideshowProgressBar.style.animationDuration = `${durationMs}ms`;
+  slideshowProgressBar.style.animationTimingFunction = "linear";
+  slideshowProgressBar.style.animationFillMode = "forwards";
+  slideshowProgressBar.style.animationName = "slideshow-fill";
+}
+
 function collectColumns() {
   const headers = document.querySelectorAll(".header-row .col");
   const columns = [];
@@ -52,6 +73,7 @@ function slideshowMaxSteps() {
 
 function revealStep() {
   clearSlideshowTimers();
+  resetProgressBar();
   const { colIdx, round } = slideshowStepInfo(slideshowStep);
   const col = slideshowColumns[colIdx];
   const photo = col.photos[round % col.photos.length];
@@ -86,6 +108,7 @@ function revealStep() {
 }
 
 function scheduleLabels(nameLabel, ageLabel) {
+  startProgressBar(STEP_MS);
   slideshowTimers.push(
     setTimeout(() => {
       nameLabel.classList.add("visible");
@@ -102,7 +125,7 @@ function scheduleLabels(nameLabel, ageLabel) {
       slideshowStep++;
       if (slideshowStep >= slideshowMaxSteps()) slideshowStep = 0;
       revealStep();
-    }, 9000),
+    }, STEP_MS),
   );
 }
 
@@ -183,6 +206,7 @@ function startSlideshow() {
 
   fullscreenOverlay.classList.remove("slideshow-paused");
   fullscreenOverlay.classList.add("open");
+  slideshowProgress.classList.add("visible");
   revealStep();
 }
 
@@ -191,6 +215,8 @@ function stopSlideshow() {
   slideshowActive = false;
   slideshowPaused = false;
   clearSlideshowTimers();
+  resetProgressBar();
+  slideshowProgress.classList.remove("visible");
   fullscreenOverlay.classList.remove("open", "slideshow-paused");
 }
 
