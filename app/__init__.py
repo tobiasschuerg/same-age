@@ -27,7 +27,9 @@ IMMICH_TIMEOUT = (5, 30)
 
 CONFIG_PATH = os.environ.get("CONFIG_PATH", "/data/config.json")
 
-config = {"immich_url": "", "api_key": ""}
+DEFAULT_CONFIG = {"immich_url": "", "api_key": "", "slideshow_seconds": 9}
+
+config = dict(DEFAULT_CONFIG)
 
 
 def load_config():
@@ -38,7 +40,9 @@ def load_config():
             with open(CONFIG_PATH) as f:
                 config = json.load(f)
         except json.JSONDecodeError, OSError:
-            config = {"immich_url": "", "api_key": ""}
+            config = dict(DEFAULT_CONFIG)
+    for key, value in DEFAULT_CONFIG.items():
+        config.setdefault(key, value)
     env_url = os.environ.get("IMMICH_URL")
     env_key = os.environ.get("IMMICH_API_KEY")
     if env_url:
@@ -109,6 +113,59 @@ def ping_immich(url):
         return resp.json().get("res") == "pong"
     except Exception:
         return False
+
+
+def check_immich_permissions(url, api_key):
+    """Check People/Search/Assets permissions for the given URL + API key.
+
+    Returns (checks, unauthorized, error). error is set only when the checks
+    could not be run at all (e.g. connection failure); checks/unauthorized
+    are meaningful only when error is None.
+    """
+    headers = {"x-api-key": api_key}
+    checks = []
+    unauthorized = False
+
+    def check_perm(name, method, path, **kwargs):
+        nonlocal unauthorized
+        r = requests.request(method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs)
+        if r.status_code == 401:
+            unauthorized = True
+        checks.append({"name": name, "ok": r.status_code == 200})
+        return r
+
+    try:
+        check_perm("People", "GET", "/people")
+        search_resp = check_perm(
+            "Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1}
+        )
+    except requests.exceptions.ConnectionError:
+        return None, False, "Could not connect to Immich."
+    except Exception:
+        return None, False, "Could not authenticate with Immich."
+
+    if unauthorized:
+        return checks, True, None
+
+    # Search only proves read access to asset metadata — separately verify
+    # download access (needed to show full-resolution/enlarged photos) with
+    # a 1-byte range request against a real asset, so a key missing
+    # asset.download doesn't get a false "Assets" pass.
+    assets_ok = checks[-1]["ok"]
+    try:
+        items = search_resp.json().get("assets", {}).get("items", [])
+        if items:
+            r = requests.get(
+                f"{url}/api/assets/{items[0]['id']}/original",
+                headers={**headers, "Range": "bytes=0-0"},
+                timeout=5,
+            )
+            assets_ok = r.status_code in (200, 206)
+    except Exception:
+        assets_ok = False
+    checks.append({"name": "Assets", "ok": assets_ok})
+
+    return checks, False, None
 
 
 def is_configured():
@@ -227,55 +284,49 @@ def check_key():
     if not api_key:
         return jsonify(ok=False, error="Please enter an API key.")
 
-    headers = {"x-api-key": api_key}
-
-    # Check required permissions directly — an Immich API key can be scoped
-    # to only the permissions it needs, so we don't require broader access
-    # (like user.read) just to prove the key itself is valid.
-    checks = []
-    unauthorized = False
-
-    def check_perm(name, method, path, **kwargs):
-        nonlocal unauthorized
-        r = requests.request(method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs)
-        if r.status_code == 401:
-            unauthorized = True
-        checks.append({"name": name, "ok": r.status_code == 200})
-        return r
-
-    try:
-        check_perm("People", "GET", "/people")
-        search_resp = check_perm(
-            "Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1}
-        )
-    except requests.exceptions.ConnectionError:
-        return jsonify(ok=False, error="Could not connect to Immich.")
-    except Exception:
-        return jsonify(ok=False, error="Could not authenticate with Immich.")
-
+    checks, unauthorized, error = check_immich_permissions(url, api_key)
+    if error:
+        return jsonify(ok=False, error=error)
     if unauthorized:
         return jsonify(ok=False, error="Invalid API key.")
 
-    # Search only proves read access to asset metadata — separately verify
-    # download access (needed to show full-resolution/enlarged photos) with
-    # a 1-byte range request against a real asset, so a key missing
-    # asset.download doesn't get a false "Assets" pass.
-    assets_ok = checks[-1]["ok"]
-    try:
-        items = search_resp.json().get("assets", {}).get("items", [])
-        if items:
-            r = requests.get(
-                f"{url}/api/assets/{items[0]['id']}/original",
-                headers={**headers, "Range": "bytes=0-0"},
-                timeout=5,
-            )
-            assets_ok = r.status_code in (200, 206)
-    except Exception:
-        assets_ok = False
-    checks.append({"name": "Assets", "ok": assets_ok})
-
     all_ok = all(c["ok"] for c in checks)
     return jsonify(ok=True, checks=checks, all_ok=all_ok)
+
+
+@app.route("/settings")
+def settings():
+    """Show connection status, API key permissions, and app preferences."""
+    checks, unauthorized, error = check_immich_permissions(config["immich_url"], config["api_key"])
+    return render_template(
+        "settings.html",
+        immich_url=config.get("immich_url", ""),
+        checks=checks or [],
+        unauthorized=unauthorized,
+        connection_error=error,
+        slideshow_seconds=config.get("slideshow_seconds", DEFAULT_CONFIG["slideshow_seconds"]),
+    )
+
+
+@app.route("/settings/slideshow", methods=["POST"])
+def save_slideshow_settings():
+    """Save the slideshow's seconds-per-photo preference."""
+    try:
+        seconds = int(request.form.get("slideshow_seconds", 9))
+    except ValueError:
+        seconds = DEFAULT_CONFIG["slideshow_seconds"]
+    config["slideshow_seconds"] = max(3, min(30, seconds))
+    save_config()
+    return redirect(url_for("settings"))
+
+
+@app.route("/settings/reset", methods=["POST"])
+def reset_connection():
+    """Clear the stored Immich connection and return to the setup wizard."""
+    config["immich_url"] = ""
+    config["api_key"] = ""
+    save_config()
+    return redirect(url_for("setup"))
 
 
 @app.route("/")
@@ -287,15 +338,20 @@ def select_persons():
 
 @app.route("/gallery")
 def gallery():
+    slideshow_seconds = config.get("slideshow_seconds", DEFAULT_CONFIG["slideshow_seconds"])
     selected_ids = request.args.getlist("persons")
     if not selected_ids:
-        return render_template("gallery.html", persons=[], data={})
+        return render_template(
+            "gallery.html", persons=[], data={}, slideshow_seconds=slideshow_seconds
+        )
 
     all_persons = fetch_people()
     persons = [p for p in all_persons if p["id"] in selected_ids]
 
     if not persons:
-        return render_template("gallery.html", persons=[], data={})
+        return render_template(
+            "gallery.html", persons=[], data={}, slideshow_seconds=slideshow_seconds
+        )
 
     person_index = {p["id"]: i for i, p in enumerate(persons)}
     num_persons = len(persons)
@@ -373,7 +429,9 @@ def gallery():
     # Sort by week ascending
     sorted_groups = OrderedDict(sorted(groups.items()))
 
-    return render_template("gallery.html", persons=persons, data=sorted_groups)
+    return render_template(
+        "gallery.html", persons=persons, data=sorted_groups, slideshow_seconds=slideshow_seconds
+    )
 
 
 @app.route("/person-thumbnail/<person_id>")

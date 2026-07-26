@@ -6,7 +6,13 @@ let slideshowTimers = [];
 let slideshowPaused = false;
 let slideshowActive = false;
 
-const STEP_MS = 9000;
+// SLIDESHOW_SECONDS is set by an inline <script> in gallery.html from the
+// user's saved settings; fall back to 9s if it's missing for any reason.
+const STEP_MS = (typeof SLIDESHOW_SECONDS === "number" ? SLIDESHOW_SECONDS : 9) * 1000;
+// Name/age labels fade in a fixed amount of time before the next photo,
+// so the reveal pacing stays sensible at any slide duration.
+const NAME_DELAY_MS = Math.max(0, STEP_MS - 4000);
+const AGE_DELAY_MS = Math.max(0, STEP_MS - 1000);
 const slideshowProgress = document.getElementById("slideshow-progress");
 const slideshowProgressBar = document.getElementById("slideshow-progress-bar");
 
@@ -112,12 +118,12 @@ function scheduleLabels(nameLabel, ageLabel) {
   slideshowTimers.push(
     setTimeout(() => {
       nameLabel.classList.add("visible");
-    }, 5000),
+    }, NAME_DELAY_MS),
   );
   slideshowTimers.push(
     setTimeout(() => {
       ageLabel.classList.add("visible");
-    }, 8000),
+    }, AGE_DELAY_MS),
   );
   slideshowTimers.push(
     setTimeout(() => {

@@ -15,6 +15,7 @@
     <a href="/" class="navbar-brand mb-0 h1">SameAge — Immich</a>
     <div class="d-flex gap-3">
         <a href="#" class="nav-link" onclick="startSlideshow(); return false;">Slideshow</a>
+        <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
     </div>
 </nav>
 
@@ -68,6 +69,7 @@
 </div>
 
 <script src="{{ url_for('static', filename='timeline.js') }}"></script>
+<script>const SLIDESHOW_SECONDS = {{ slideshow_seconds }};</script>
 <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
 </body>
 </html>
