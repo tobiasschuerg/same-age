@@ -14,13 +14,13 @@ document.body.appendChild(highlightContainer);
 let hideTimeout = null;
 
 // biome-ignore lint/correctness/noUnusedVariables: called from HTML onmouseover
-function showImage(_element, path, title) {
+function showImage(element) {
   if (hideTimeout) {
     clearTimeout(hideTimeout);
     hideTimeout = null;
   }
-  highlightImg.src = path;
-  highlightLabel.textContent = title;
+  highlightImg.src = element.dataset.src;
+  highlightLabel.textContent = element.dataset.title;
   highlightContainer.classList.add("visible");
 }
 

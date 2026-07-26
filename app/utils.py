@@ -5,7 +5,10 @@ def get_number_of_weeks(start_date, end_date):
 
 
 def get_number_of_months(start_date, end_date):
-    return (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+    months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+    if end_date.day < start_date.day:
+        months -= 1
+    return months
 
 
 def get_group_key(start_date, end_date):
@@ -30,8 +33,8 @@ def diff_str(start_date, end_date):
         return f"{y} {y_label}"
 
     total_weeks = get_number_of_weeks(start_date, end_date)
-    years = (total_weeks - 1) // 52
-    weeks = (total_weeks - 1) % 52 + 1
+    years = total_weeks // 52
+    weeks = total_weeks % 52
 
     y_label = "year" if years == 1 else "years"
     w_label = "week" if weeks == 1 else "weeks"

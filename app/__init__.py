@@ -51,6 +51,7 @@ def save_config():
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     with open(CONFIG_PATH, "w") as f:
         json.dump(config, f, indent=2)
+    os.chmod(CONFIG_PATH, 0o600)
 
 
 def normalize_url(url):
@@ -351,4 +352,4 @@ def original(asset_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="127.0.0.1", port=5000)
