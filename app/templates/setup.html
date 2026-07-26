@@ -150,7 +150,10 @@
 
         {% elif step == 2 %}
         <h2>Connect to Immich</h2>
-        <p class="step-info">Step 2 of 2 — API Key</p>
+        <p class="step-info">
+            Step 2 of 2 — API Key<br>
+            Connecting to <strong>{{ immich_url }}</strong>
+        </p>
 
         <div class="mb-3">
             <label for="api_key" class="form-label">API Key</label>

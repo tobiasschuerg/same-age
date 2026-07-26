@@ -229,29 +229,30 @@ def check_key():
 
     headers = {"x-api-key": api_key}
 
-    # Validate key
+    # Check required permissions directly — an Immich API key can be scoped
+    # to only the permissions it needs, so we don't require broader access
+    # (like user.read) just to prove the key itself is valid.
+    checks = []
+    unauthorized = False
+
+    def check_perm(name, method, path, **kwargs):
+        nonlocal unauthorized
+        r = requests.request(method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs)
+        if r.status_code == 401:
+            unauthorized = True
+        checks.append({"name": name, "ok": r.status_code == 200})
+
     try:
-        resp = requests.get(f"{url}/api/users/me", headers=headers, timeout=5)
-        if resp.status_code == 401:
-            return jsonify(ok=False, error="Invalid API key.")
-        resp.raise_for_status()
+        check_perm("People", "GET", "/people")
+        check_perm("Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1})
     except requests.exceptions.ConnectionError:
         return jsonify(ok=False, error="Could not connect to Immich.")
     except Exception:
-        return jsonify(ok=False, error="Invalid API key or could not authenticate.")
+        return jsonify(ok=False, error="Could not authenticate with Immich.")
 
-    # Check required permissions
-    checks = []
+    if unauthorized:
+        return jsonify(ok=False, error="Invalid API key.")
 
-    def check_perm(name, method, path, **kwargs):
-        try:
-            r = requests.request(method, f"{url}/api{path}", headers=headers, timeout=5, **kwargs)
-            checks.append({"name": name, "ok": r.status_code == 200})
-        except Exception:
-            checks.append({"name": name, "ok": False})
-
-    check_perm("People", "GET", "/people")
-    check_perm("Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1})
     # Search returns asset data, so if it works, asset read access is confirmed
     search_ok = checks[-1]["ok"]
     checks.append({"name": "Assets", "ok": search_ok})
