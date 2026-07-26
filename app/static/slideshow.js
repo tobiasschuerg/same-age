@@ -8,7 +8,8 @@ let slideshowActive = false;
 
 // SLIDESHOW_SECONDS/REVEAL_DELAY_SECONDS are set by an inline <script> in
 // gallery.html from the user's saved settings; fall back if missing.
-const STEP_MS = (typeof SLIDESHOW_SECONDS === "number" ? SLIDESHOW_SECONDS : 9) * 1000;
+const STEP_MS =
+  (typeof SLIDESHOW_SECONDS === "number" ? SLIDESHOW_SECONDS : 9) * 1000;
 // Name label fades in after the reveal delay; age label follows 3s later.
 // Both are clamped to the slide duration so a long delay can't outlast it.
 const NAME_DELAY_MS = Math.min(

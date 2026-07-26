@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Force LF for files biome formats, regardless of local core.autocrlf —
+# avoids CRLF-vs-LF format check failures on Windows checkouts.
+app/static/*.js text eol=lf
+app/static/*.css text eol=lf
