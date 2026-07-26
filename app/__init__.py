@@ -241,10 +241,13 @@ def check_key():
         if r.status_code == 401:
             unauthorized = True
         checks.append({"name": name, "ok": r.status_code == 200})
+        return r
 
     try:
         check_perm("People", "GET", "/people")
-        check_perm("Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1})
+        search_resp = check_perm(
+            "Search", "POST", "/search/metadata", json={"type": "IMAGE", "size": 1}
+        )
     except requests.exceptions.ConnectionError:
         return jsonify(ok=False, error="Could not connect to Immich.")
     except Exception:
@@ -253,9 +256,23 @@ def check_key():
     if unauthorized:
         return jsonify(ok=False, error="Invalid API key.")
 
-    # Search returns asset data, so if it works, asset read access is confirmed
-    search_ok = checks[-1]["ok"]
-    checks.append({"name": "Assets", "ok": search_ok})
+    # Search only proves read access to asset metadata — separately verify
+    # download access (needed to show full-resolution/enlarged photos) with
+    # a 1-byte range request against a real asset, so a key missing
+    # asset.download doesn't get a false "Assets" pass.
+    assets_ok = checks[-1]["ok"]
+    try:
+        items = search_resp.json().get("assets", {}).get("items", [])
+        if items:
+            r = requests.get(
+                f"{url}/api/assets/{items[0]['id']}/original",
+                headers={**headers, "Range": "bytes=0-0"},
+                timeout=5,
+            )
+            assets_ok = r.status_code in (200, 206)
+    except Exception:
+        assets_ok = False
+    checks.append({"name": "Assets", "ok": assets_ok})
 
     all_ok = all(c["ok"] for c in checks)
     return jsonify(ok=True, checks=checks, all_ok=all_ok)
