@@ -2,6 +2,7 @@ import json
 import os
 from collections import OrderedDict
 from datetime import datetime
+from urllib.parse import urlsplit, urlunsplit
 
 import requests
 from flask import (
@@ -57,9 +58,57 @@ def save_config():
 def normalize_url(url):
     """Strip whitespace/trailing slashes, prepend http:// if no scheme."""
     url = (url or "").strip().rstrip("/")
-    if url and not url.startswith(("http://", "https://")):
+    if not url:
+        return ""
+    if not url.startswith(("http://", "https://")):
         url = "http://" + url
     return url
+
+
+# Top-level routes of the Immich web app — if a pasted URL's first path
+# segment matches one of these, it's a copy-pasted browser URL rather than
+# a reverse-proxy path prefix, so it's safe to strip.
+IMMICH_WEB_ROUTES = {
+    "photos",
+    "sharing",
+    "explore",
+    "search",
+    "albums",
+    "people",
+    "places",
+    "folders",
+    "tags",
+    "map",
+    "memories",
+    "trash",
+    "archive",
+    "favorites",
+    "admin",
+    "auth",
+    "user-settings",
+    "utilities",
+    "partners",
+}
+
+
+def strip_known_web_route(url):
+    """Drop the path if it looks like a copy-pasted Immich web app URL
+    (e.g. .../photos). Leaves custom reverse-proxy path prefixes untouched."""
+    parts = urlsplit(url)
+    first_segment = parts.path.strip("/").split("/", 1)[0]
+    if first_segment in IMMICH_WEB_ROUTES:
+        return urlunsplit((parts.scheme, parts.netloc, "", "", ""))
+    return url
+
+
+def ping_immich(url):
+    """Check whether an Immich server responds at the given base URL."""
+    try:
+        resp = requests.get(f"{url}/api/server/ping", timeout=5)
+        resp.raise_for_status()
+        return resp.json().get("res") == "pong"
+    except Exception:
+        return False
 
 
 def is_configured():
@@ -155,17 +204,18 @@ def setup():
 @app.route("/setup/check-url", methods=["POST"])
 def check_url():
     """AJAX endpoint to verify Immich URL reachability."""
-    url = normalize_url((request.json or {}).get("url", ""))
-    if not url:
+    raw = normalize_url((request.json or {}).get("url", ""))
+    if not raw:
         return jsonify(ok=False, error="Please enter a URL.")
-    try:
-        resp = requests.get(f"{url}/api/server/ping", timeout=5)
-        resp.raise_for_status()
-        if resp.json().get("res") != "pong":
-            raise ValueError("Unexpected response")
-    except Exception:
-        return jsonify(ok=False, error="Could not reach Immich at that URL.")
-    return jsonify(ok=True, url=url)
+
+    # Try the cleaned-up guess first (strips copy-pasted web app routes like
+    # /photos), then fall back to the URL exactly as entered — some
+    # deployments put Immich behind a custom reverse-proxy path prefix.
+    candidates = list(dict.fromkeys([strip_known_web_route(raw), raw]))
+    for url in candidates:
+        if ping_immich(url):
+            return jsonify(ok=True, url=url)
+    return jsonify(ok=False, error="Could not reach Immich at that URL.")
 
 
 @app.route("/setup/check-key", methods=["POST"])
