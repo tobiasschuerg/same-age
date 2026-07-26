@@ -214,7 +214,7 @@ def check_key():
 def select_persons():
     """Show person selection page."""
     persons = fetch_people()
-    return render_template("select.html", persons=persons)
+    return render_template("select.html", persons=persons, immich_url=config.get("immich_url", ""))
 
 
 @app.route("/gallery")

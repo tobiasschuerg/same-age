@@ -69,6 +69,45 @@
         }
         .compare-btn.visible { display: block; }
         .compare-btn:hover { background: #4a73cc; color: #fff; }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem 4rem;
+        }
+        .empty-state-icon {
+            width: 108px;
+            height: 92px;
+            margin-bottom: 1.75rem;
+        }
+        .empty-state-icon rect {
+            stroke: #F4EBD9;
+            stroke-width: 2;
+        }
+        .empty-state h3 {
+            color: #483D3F;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .empty-state p {
+            max-width: 380px;
+            margin: 0 auto 1.5rem;
+        }
+        .empty-state-btn {
+            display: inline-block;
+            background: #648DE5;
+            color: #fff;
+            padding: 0.65rem 1.6rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .empty-state-btn:hover {
+            background: #4a73cc;
+            color: #fff;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -80,7 +119,9 @@
 <div class="container-fluid">
     <div class="text-center mt-4 mb-2">
         <h2 style="color: #483D3F;">Select people to compare</h2>
+        {% if persons %}
         <p class="text-muted">Only people with a birthdate set in Immich are shown.</p>
+        {% endif %}
     </div>
     <div class="person-grid">
         {% for person in persons %}
@@ -90,6 +131,20 @@
         </div>
         {% endfor %}
     </div>
+    {% if not persons %}
+    <div class="empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 120 96" aria-hidden="true">
+            <rect x="6" y="20" width="58" height="58" rx="6" fill="#CDC392" transform="rotate(-8 35 49)"/>
+            <rect x="31" y="16" width="58" height="58" rx="6" fill="#9EB7E5" transform="rotate(6 60 45)"/>
+            <rect x="47" y="22" width="58" height="58" rx="6" fill="#648DE5" transform="rotate(-3 76 51)"/>
+        </svg>
+        <h3>No one to compare yet</h3>
+        <p class="text-muted">People show up here once they have a birthdate set in Immich.</p>
+        {% if immich_url %}
+        <a class="empty-state-btn" href="{{ immich_url }}/people" target="_blank" rel="noopener noreferrer">Manage People in Immich</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 
 <a id="compare-btn" class="compare-btn" href="#">
